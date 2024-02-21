@@ -1,32 +1,34 @@
 
 
 import 'package:get/get.dart';
-import 'package:getx_mvvm/res/routes/routes_name.dart';
-import 'package:getx_mvvm/view/home/home_view.dart';
-import 'package:getx_mvvm/view/login/login_view.dart';
-import 'package:getx_mvvm/view/splash_screen.dart';
+import 'package:whsuites_calling/res/routes/routes_name.dart';
+import 'package:whsuites_calling/view/call/CallBinding.dart';
+import 'package:whsuites_calling/view/call/call_view.dart';
+
+import '../../view/login/login_view.dart';
+import '../../view/splash_screen.dart';
 
 class AppRoutes {
 
   static appRoutes() => [
     GetPage(
       name: RouteName.splashScreen,
-      page: () => SplashScreen() ,
-      transitionDuration: Duration(milliseconds: 250),
-      transition: Transition.leftToRightWithFade ,
-    ) ,
+      page: () => SplashScreen(),
+      transition: Transition.leftToRight,
+      transitionDuration: Duration(milliseconds: 50),
+    ),
     GetPage(
       name: RouteName.loginView,
-      page: () => LoginView() ,
-      transitionDuration: Duration(milliseconds: 250),
-      transition: Transition.leftToRightWithFade ,
-    ) ,
+      page: () => LoginView(),
+      transition: Transition.leftToRight,
+      transitionDuration: Duration(milliseconds: 50),
+    ),
     GetPage(
-      name: RouteName.homeView,
-      page: () => HomeView() ,
-      transitionDuration: Duration(milliseconds: 250),
-      transition: Transition.leftToRightWithFade ,
-    ) ,
+      name: RouteName.callview,
+      page: () => CallView(),
+      binding: CallBinding(),
+      transition: Transition.leftToRight,
+      transitionDuration: Duration(milliseconds: 50),
+    ),
   ];
-
 }

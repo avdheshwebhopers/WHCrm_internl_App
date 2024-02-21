@@ -1,75 +1,98 @@
-import 'package:whsuits_crm/repository/login_repository.dart';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:whsuites_calling/models/response_model/login_response_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:whsuits_crm/user_viewModel.dart';
-import 'package:provider/provider.dart';
-import 'package:whsuits_crm/response_model/login_response_model.dart';
-import 'package:whsuits_crm/PopUp.dart';
-import 'home_screen.dart';
+import '../../../repository/beforelogin/login_repository.dart';
+import '../../../res/routes/routes_name.dart';
+import '../../../utils/utils.dart';
+import '../user_preference/user_prefrence_view_model.dart';
 
-class LoginViewModel with ChangeNotifier{
+class LoginViewModel extends GetxController {
+  final _api = LoginRepository();
+  final userViewModel = UserViewModel();
 
-  final _myRepo = LoginRepository();
+  final emailController = TextEditingController().obs;
+  final passwordController = TextEditingController().obs;
 
-  bool _loading = false ;
-  bool get loading => _loading ;
+  final emailFocusNode = FocusNode().obs;
+  final passwordFocusNode = FocusNode().obs;
 
-  setLoading(bool value){
-    _loading = value;
-    notifyListeners();
-  }
+  final loading = false.obs;
 
-  Future<void> login(dynamic data, BuildContext context) async {
+  Future<void> loginApi(BuildContext context) async {
+    if (emailController.value.text.isEmpty || passwordController.value.text.isEmpty) {
+      Utils.errorAlertDialogue("Please enter email and password", context);
+      return;
+    }
 
-    setLoading(true);
+    loading.value = true;
 
-    _myRepo.login(data).then((value) {
-      setLoading(false);
+    final deviceToken = await _getDeviceToken();
 
-      if (value.accessToken != null && value.user != null) {
-        print("Login successful. Access Token: ${value.accessToken}");
+    Map data = {
+      'email': emailController.value.text,
+      'password': passwordController.value.text,
+      'device_id': deviceToken,
+    };
 
-        final userPreferences = Provider.of<UserViewModel>(context, listen: false);
-        userPreferences.saveUser(
-          LoginResponseModel(
-            accessToken: value.accessToken.toString(),
-            user: User(
-              firstName: value.user?.firstName.toString(),
-              isAdmin: value.user?.isAdmin ?? false,
-            ),
-          ),
-        );
+    try {
+      final value = await _api.loginApi(data);
 
-        // Print information for debugging
-        print("Login successful. Access Token: ${value.accessToken}");
+      loading.value = false;
 
-        // Show a success message
-        Popup.errorAlertDialogue("Logged In Successfully", context);
-
-        // Navigate to HomeScreen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(
-              token: value.user?.firstName!,
-              isAdmin: value.user?.isAdmin ?? false,
-            ),
-          ),
-        );
+      if (value is Map<String, dynamic> && value.containsKey('accessToken')) {
+        await _handleSuccessfulLogin(context, value);
       } else {
-        // Print information for debugging
-        print("Login failed. Access Token: ${value.accessToken}, User: ${value.user}");
-
-        // Handle the case where either accessToken or user is null
-        Popup.errorAlertDialogue("Invalid Credentials", context);
+        Utils.errorAlertDialogue("Invalid Credentials", context);
       }
-    }).catchError((error) {
-      // Handle errors during login
-      setLoading(false);
+    } catch (error) {
+      loading.value = false;
       if (kDebugMode) {
         print(error.toString());
       }
-    });
+    }
   }
 
+  Future<String> _getDeviceToken() async {
+    final messaging = FirebaseMessaging.instance;
+    return await messaging.getToken() ?? "abed12345";
+  }
+
+  Future<void> _handleSuccessfulLogin(
+      BuildContext context, Map<String, dynamic> value) async {
+    // Check if 'accessToken' and 'user' are present in the response
+    if (value.containsKey('accessToken') && value.containsKey('user')) {
+      final loginResponseModel = LoginResponseModel(
+        accessToken: value['accessToken'].toString(),
+        user: User(
+          firstName: value['user']['first_name'].toString(),
+          lastName: value['user']['last_name'].toString(),
+          id: value['user']['id'].toString(),
+          isAdmin: value['user']['is_admin'] ?? false,
+        ),
+      );
+
+      // Debug prints
+      print('User Information Before Save: ${loginResponseModel.user!.firstName}');
+
+      // Save the user information
+      await userViewModel.saveUser(loginResponseModel);
+
+      // Debug prints
+
+      Get.delete<LoginViewModel>();
+
+      Get.toNamed(
+        RouteName.callview,
+      );
+
+      Utils.successDialogue("Logged In Successfully", context);
+    } else {
+      Utils.errorAlertDialogue("Invalid Credentials", context);
+    }
+  }
 }
+

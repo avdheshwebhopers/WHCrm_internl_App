@@ -1,79 +1,94 @@
+import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:get/get.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:whsuites_calling/res/colors/app_color.dart';
+import 'package:whsuites_calling/res/routes/routes.dart';
+import 'package:whsuites_calling/view/call/call_view.dart';
+import 'package:workmanager/workmanager.dart';
 
-
-void main() {
-  runApp(const MyApp());
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message)async {
+  Platform.isAndroid?
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyD7x0K9O-ulJQr8r6xxl8glbahEXZJFcXg",
+      appId: "1:400761969368:android:02ffdeb660ad94ccf1d5ad",
+      messagingSenderId: "400761969368",
+      projectId: "whsuites-firebase",
+    ),
+  )
+      :await Firebase.initializeApp();
 }
+
+
+Future<void> main() async {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: AppColors.backgroundcolor,
+    ),
+  );
+  WidgetsFlutterBinding.ensureInitialized();
+
+
+  Platform.isAndroid?
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyD7x0K9O-ulJQr8r6xxl8glbahEXZJFcXg",
+      appId: "1:400761969368:android:02ffdeb660ad94ccf1d5ad",
+      messagingSenderId: "400761969368",
+      projectId: "whsuites-firebase",
+    ),
+  )
+      :await Firebase.initializeApp();
+  //await Cart().loadCart();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
+    FlutterNativeSplash.remove();
 
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
+    return ResponsiveSizer(
+        builder: (context, orientation, screenType) {
+      return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          //themeMode: Provider.of<ThemeChange>(context).thememode,
+          theme: ThemeData(
+              fontFamily: "SFPro-Rounded",
+              brightness: Brightness.light,
+              primarySwatch: Colors.indigo,
+              scaffoldBackgroundColor: AppColors.backgroundcolor,
+              appBarTheme: AppBarTheme(
+                  color: AppColors.backgroundcolor.withOpacity(1),
+                  iconTheme: const IconThemeData(
+                      color: Colors.black
+                  ))
+          ),
+        getPages: AppRoutes.appRoutes(),
+      );
+
+            },
+            maxMobileWidth: 400,
+          );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
 
 
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
-      ),
-      body: Center(
-
-        child: Column(
-
-
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}

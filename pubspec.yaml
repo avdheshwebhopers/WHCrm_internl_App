@@ -39,6 +39,26 @@ dependencies:
   firebase_auth: ^4.15.3
   firebase_messaging: ^14.7.9
   firebase_analytics: ^10.7.4
+  flutter_local_notifications: ^14.1.0
+
+
+  another_flushbar: ^1.12.30
+  google_fonts: ^6.1.0
+  socket_io_client: ^2.0.3+1
+  web_socket_channel: ^2.4.0
+  flutter_phone_direct_caller: ^2.1.1
+  url_launcher: ^6.2.2
+  phone_state_background: ^0.0.4
+  call_log: ^4.0.0
+  workmanager: ^0.5.2
+  on_audio_query: ^2.9.0
+  rxdart: ^0.27.7
+  permission_handler: ^11.1.0
+  multipart: ^0.1.2
+  flutter_native_splash: ^2.3.9
+
+
+  shared_preferences: ^2.2.2
 
   http: ^1.1.2
 
@@ -74,6 +94,12 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+
+  assets:
+    - assets/gif/
+    - assets/image/
+
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

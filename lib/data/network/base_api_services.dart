@@ -12,3 +12,4 @@ abstract class BaseApiServices{
   Future<dynamic> putApiResponse(String url, dynamic bodyParms);
 
 }
+

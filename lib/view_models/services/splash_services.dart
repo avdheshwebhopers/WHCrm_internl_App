@@ -1,32 +1,34 @@
 
-
 import 'dart:async';
-
 import 'package:get/get.dart';
-import 'package:getx_mvvm/res/routes/routes_name.dart';
-import 'package:getx_mvvm/view_models/controller/user_preference/user_prefrence_view_model.dart';
+import '../../res/routes/routes_name.dart';
+import '../controller/user_preference/user_prefrence_view_model.dart';
+
 
 class SplashServices {
 
-  UserPreference userPreference = UserPreference();
+  UserViewModel userPreference = UserViewModel();
 
   void isLogin(){
 
 
     userPreference.getUser().then((value){
 
-      print(value.token);
-      print(value.isLogin);
+      print(value.accessToken);
 
-      if(value.isLogin == false || value.isLogin.toString() == 'null'){
+      if(value.accessToken == "null" || value.accessToken.toString() == ''){
         Timer(const Duration(seconds: 3) ,
                 () => Get.toNamed(RouteName.loginView) );
       }else {
-        Timer(const Duration(seconds: 3) ,
-                () => Get.toNamed(RouteName.homeView) );
+        Timer(
+          const Duration(seconds: 3),
+              () => Get.toNamed(
+            RouteName.callview,
+            arguments: {'accessToken': value.accessToken},
+          ),
+        );
       }
     });
-
-
   }
 }
+

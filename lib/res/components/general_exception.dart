@@ -12,6 +12,7 @@ class GeneralExceptionWidget extends StatefulWidget {
   State<GeneralExceptionWidget> createState() => _GeneralExceptionWidgetState();
 }
 
+
 class _GeneralExceptionWidgetState extends State<GeneralExceptionWidget> {
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class _GeneralExceptionWidgetState extends State<GeneralExceptionWidget> {
       child: Column(
         children: [
           SizedBox(height: height * .15 ,),
-          Icon(Icons.cloud_off , color: AppColors.redColor,size: 50,),
+          Icon(Icons.cloud_off , color: AppColors.primaryColor,size: 50,),
           Padding(
             padding: const EdgeInsets.only(top: 30),
             child: Center(child: Text('general_exception'.tr , textAlign: TextAlign.center,)),
@@ -44,3 +45,6 @@ class _GeneralExceptionWidgetState extends State<GeneralExceptionWidget> {
     );
   }
 }
+
+
+
