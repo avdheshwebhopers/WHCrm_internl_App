@@ -8,7 +8,6 @@ import '../../../res/app_url/app_urls.dart';
 import '../../../utils/utils.dart';
 import 'package:http/http.dart' as http;
 
-
 class LeadDetailsViewModel extends GetxController {
 
   final _apiService = NetworkApiServices();
@@ -102,34 +101,6 @@ class LeadDetailsViewModel extends GetxController {
       });
     }
 
-    // ... check for other fields and handle validation
-
-    // var url = AppUrls
-    //     .leadDetailApi ;
-    // // Assuming AppUrls.callDetailApi is your API endpoint
-    // var request = http.MultipartRequest('POST', Uri.parse(url));
-    //
-    // // Attach the MP3 file as a part
-    //
-    // request.files.add(
-    //   http.MultipartFile.fromBytes(
-    //     'call_record',
-    //     latestMp3FilePath,
-    //     filename: 'latest_song.mp3',
-    //   ),
-    // );
-    //
-    // // Add other fields to the request
-    // request.fields.addAll({
-    //   'id': id.value,
-    //   'type': type.value,
-    //   'duration': duration.value,
-    //   'date': date.value,
-    //   'from_number': fromNumber.value,
-    //   'to_number': toNumber.value,
-    //   'call_type': calltype.value,
-    // });
-
     try {
       print('Sending request...');
       String token = await _apiService.postApiResponseToken();
@@ -145,7 +116,6 @@ class LeadDetailsViewModel extends GetxController {
           Utils.errorAlertDialogue("Data Missing $response", context);
         }
       } else {
-        // Handle error response
         Utils.errorAlertDialogue("Failed to send data.", context);
       }
     } catch (error) {

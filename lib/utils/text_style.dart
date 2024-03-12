@@ -75,8 +75,9 @@ class TextWithStyle{
     return Text(
       message,
       maxLines: 2,
-      style: TextStyle(
-          fontSize: 17.sp,
+      style: GoogleFonts.nunito(
+          fontSize: 16.sp,
+          color: AppColors.primaryColor,
           fontWeight: FontWeight.bold),
     );
   }

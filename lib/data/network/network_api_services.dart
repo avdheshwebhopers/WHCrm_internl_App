@@ -3,8 +3,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../res/routes/routes_name.dart';
+import '../../view_models/controller/user_preference/user_prefrence_view_model.dart';
 import '../app_exceptions.dart';
 import 'base_api_services.dart';
 
@@ -180,14 +184,18 @@ class NetworkApiServices extends BaseApiServices {
         return responseJson;
 
       case 401:
-        var responseJson = json.decode(response.body.toString());
-        return responseJson;
+        _handleUnauthorized();
+        break;
 
       case 403:
         var responseJson = json.decode(response.body.toString());
         return responseJson;
 
       case 404:
+        var responseJson = json.decode(response.body.toString());
+        return responseJson;
+
+      case 405:
         var responseJson = json.decode(response.body.toString());
         return responseJson;
 
@@ -206,6 +214,31 @@ class NetworkApiServices extends BaseApiServices {
   }
 }
 
+// Handle the unauthorized scenario
+void _handleUnauthorized() async {
+
+  // Show an alert dialog indicating session expired
+  await Get.defaultDialog(
+    barrierDismissible: false,
+    title: "Session Expired",
+    middleText: "Your session has expired. Please log in again.",
+    onConfirm: () async {
+      // Clear any user-related data
+      await _logoutAndNavigateToSignIn();
+    },
+  );
+}
+
+// Logout the user and navigate to the sign-in screen
+Future<void> _logoutAndNavigateToSignIn() async {
+  UserViewModel userViewModel = UserViewModel();
+
+  // Clear any user-related data
+  userViewModel.remove();
+
+  // Navigate to the login view and clear the entire navigation stack
+  Get.offAllNamed(RouteName.loginView);
+}
 
 
 

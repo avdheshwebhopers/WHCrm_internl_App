@@ -35,11 +35,12 @@ class CallControllers extends GetxController {
     super.onInit();
     accessToken = Get.arguments?['accessToken'] ?? '';
     print("accessToken>>>>> $accessToken");
-    initSocket(); // Make sure initSocket is called during initialization
+    initSocket();
+    // Make sure initSocket is called during initialization
   }
 
   Future<void> initSocket() async {
-    socket = io.io("https://webhopers.whsuites.com:3302/socket", <String, dynamic>{
+    socket = io.io("https://webhopers.whsuites.com:3006/socket", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });

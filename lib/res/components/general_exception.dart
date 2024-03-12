@@ -47,4 +47,3 @@ class _GeneralExceptionWidgetState extends State<GeneralExceptionWidget> {
 }
 
 
-

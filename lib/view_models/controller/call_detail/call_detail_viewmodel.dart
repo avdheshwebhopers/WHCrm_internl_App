@@ -2,7 +2,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-
 import '../../../data/network/network_api_services.dart';
 
 import '../../../res/app_url/app_urls.dart';
@@ -118,4 +117,3 @@ class CallDetailsViewModel extends GetxController {
     }
   }
 }
-

@@ -1,3 +1,4 @@
+
 class LoginResponseModel {
   String? accessToken;
   User? user;
@@ -55,5 +56,4 @@ class User {
     return data;
   }
 }
-
 

@@ -41,7 +41,7 @@ class LoginViewModel extends GetxController {
     try {
       final value = await _api.loginApi(data);
 
-      loading.value = false;
+
 
       if (value is Map<String, dynamic> && value.containsKey('accessToken')) {
         await _handleSuccessfulLogin(context, value);

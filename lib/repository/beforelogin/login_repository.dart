@@ -23,8 +23,18 @@ class LoginRepository {
     return response;
   }
 
+  Future<dynamic> globalSearchApi (var data) async {
+    dynamic response = await _apiService.postApiResponse( AppUrls.globalSearchApi , data);
+    return response;
+  }
+
   Future<dynamic> logOutApi (var data) async {
     dynamic response = await _apiService.postApiResponse( AppUrls.logoutApi , data);
+    return response;
+  }
+
+  Future<dynamic> callTypeApi (var data) async {
+    dynamic response = await _apiService.postApiResponse( AppUrls.callType , data);
     return response;
   }
 
@@ -35,6 +45,8 @@ class LoginRepository {
     print("profile response: $response");
     return response;
   }
+
+
 }
 
 

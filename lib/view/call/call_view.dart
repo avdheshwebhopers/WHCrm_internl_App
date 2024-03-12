@@ -13,6 +13,8 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:whsuites_calling/res/assets/image_assets.dart';
+import 'package:whsuites_calling/res/colors/app_color.dart';
+import 'package:whsuites_calling/utils/text_style.dart';
 import 'package:whsuites_calling/view/call/CallControllers.dart';
 import 'package:whsuites_calling/view_models/controller/call_detail/lead_detail_viewmodel.dart';
 import 'package:workmanager/workmanager.dart';
@@ -85,7 +87,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _fetchProfileApi();
+
+   // _fetchProfileApi();
     retrievePermissions();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -146,8 +149,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   }
 
   void setupStreamListeners() {
-    _callControllers.receivedPhoneNumberStream.listen(
-        _handleReceivedPhoneNumber);
+    _callControllers.receivedPhoneNumberStream.listen(_handleReceivedPhoneNumber);
     _callControllers.receivedIDStream.listen(_handleReceivedID);
     _callControllers.typeStream.listen(_handleType);
     _callControllers.answeredStream.listen(_handleAnsweredType);
@@ -187,7 +189,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   Future<void> makeCallInBackground(String phoneNumber) async {
     try {
       final backgroundChannel = MethodChannel('background_service');
-      await backgroundChannel.invokeMethod('makeCall', {'phoneNumber': _phoneNumberController});
+      await backgroundChannel.invokeMethod(
+          'makeCall', {'phoneNumber': _phoneNumberController});
     } on PlatformException catch (e) {
       print('Failed to make call in background: ${e.message}');
     }
@@ -200,17 +203,18 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
         // Make call either in foreground or background
         WidgetsBinding.instance.addPostFrameCallback((_) {
           // Check app's lifecycle state
-          if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+          if (WidgetsBinding.instance.lifecycleState ==
+              AppLifecycleState.resumed) {
             _makeCall(phoneNumber);
           } else {
             // App is in background, make call using background service
-             makeCallInBackground(phoneNumber);
+            makeCallInBackground(phoneNumber);
           }
         });
       } else {
         // Handle case where permissions are not granted
         print('Permissions not granted to make call.');
-       }
+      }
     });
   }
 
@@ -232,54 +236,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _fetchProfileApi() async {
-    print("Fetching the profile Api");
-    try {
-      dynamic response = await LoginRepository().profileApi();
-      print("Profile response: $response");
 
-      if (response != null && response['statusCode'] == 401) {
-        print("Received 401 error: Session expired");
-        _showSessionExpiredDialog();
-      } else {
-        // Handle successful response
-        // Update UI or process data accordingly
-      }
-    } catch (e) {
-      print('Error fetching profile API: $e');
-      // Handle other types of errors gracefully if needed
-      // For now, let's just print the error for debugging
-    }
-  }
-
-  void _showSessionExpiredDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Disable dismissing the dialog by tapping outside
-      builder: (context) => AlertDialog(
-        title: Text('Session Expired'),
-        content: Text('Your session has expired. Please log in again.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _latestCallLogEntry = null;
-                views = [];
-                _receivedID = "";
-              });
-              _callControllers.socket.disconnect();
-              _callControllers.onClose();
-
-              userViewModel.remove();
-              // Close the dialog and navigate to the login screen
-              Get.offAllNamed(RouteName.loginView); // Navigate to login screen and clear navigation stack
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<Uint8List> _getLatestMp3FileData() async {
     List<SongModel> songs = await _audioQuery.querySongs(
@@ -343,7 +300,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   void _callNumber(String phoneNumber) async {
     try {
       await FlutterPhoneDirectCaller.callNumber("+91" + phoneNumber);
-
     } catch (e) {
       print('Error calling number: $e');
     }
@@ -362,7 +318,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           .toString()
           : '';
       if (_latestCallLogEntry?.simDisplayName == 0) {
-       // print("notanswered: ${_latestCallLogEntry?.duration} , $_notAnswered");
+        // print("notanswered: ${_latestCallLogEntry?.duration} , $_notAnswered");
         _leadDetailsViewModel.fromNumber.value =
             _latestCallLogEntry?.simDisplayName?.toString() ?? "";
       } else {
@@ -375,7 +331,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           _latestCallLogEntry?.simDisplayName?.toString() ?? "";
       _leadDetailsViewModel.toNumber.value =
           phoneNumberToSearch;
-     // print("to number is ${_latestCallLogEntry!.cachedMatchedNumber.toString()}");
+      // print("to number is ${_latestCallLogEntry!.cachedMatchedNumber.toString()}");
 
       if (_latestCallLogEntry?.duration == 0) {
         print("notanswered: ${_latestCallLogEntry?.duration} , $_notAnswered");
@@ -405,7 +361,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           phoneNumberToSearch;
 
       if (_latestCallLogEntry?.duration == 0) {
-        print("notanswered customer: ${_latestCallLogEntry?.duration} , $_notAnswered");
+        print("notanswered customer: ${_latestCallLogEntry
+            ?.duration} , $_notAnswered");
         _customerDetailsViewModel.calltype.value = _notAnswered;
       } else {
         print("answered: ${_latestCallLogEntry?.duration} , $_answered");
@@ -496,7 +453,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     return AppBar(
       title: FutureBuilder<String>(
         future: userViewModel.getUser().then((user) =>
-        '${user.user!.firstName} ${user.user!.lastName ?? ''}'), // Retrieve the first name
+        '${user.user!.firstName} ${user.user!.lastName ?? ''}'),
+        // Retrieve the first name
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Text('...'); // Placeholder while loading
@@ -549,7 +507,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   Widget buildBody() {
     return Stack(
       fit: StackFit.expand,
-      alignment: Alignment(0.0 , 0.0),
+      alignment: Alignment(0.0, 0.0),
       children: [
         FractionallySizedBox(
           heightFactor: 0.5, // Adjust the fraction as needed
@@ -568,13 +526,15 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/image/logo.png', // Replace 'your_image.png' with the path to your image asset
+                  'assets/image/logo.png',
+                  // Replace 'your_image.png' with the path to your image asset
                   width: 50, // Adjust the width of the image as needed
                   height: 50, // Adjust the height of the image as needed
                 ),
                 SizedBox(height: 2.h),
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0 , horizontal: 10.0),
+                  padding: EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 10.0),
                   child: Container(
                     width: 70.w, // Adjust the width as needed
                     child: Text(
@@ -603,6 +563,48 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
               fontWeight: FontWeight.bold,
             ),
           ),
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(0),
+                 child: GestureDetector(
+                    onTap: () {
+                      Get.toNamed(
+                      RouteName.globalSearchView
+                      );
+                      },
+          child: Card(
+            elevation: 0.5.w,
+            margin: EdgeInsets.all(6.w),
+            color: AppColors.backgroundcolor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(2.w),
+            ),
+            child: Padding(
+              padding:  EdgeInsets.symmetric(
+                  vertical: 1.h, horizontal: 3.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextWithStyle.productTitle(
+                    context , 'Make Calls with Global Search'
+                  ),
+                  IconButton(
+                    onPressed: () {
+
+                    },
+                    icon: Icon(Icons.arrow_forward
+                    , color: AppColors.primaryColor,),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+       ),
         ),
       ],
     );
