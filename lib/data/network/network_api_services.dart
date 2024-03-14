@@ -37,17 +37,28 @@ class NetworkApiServices extends BaseApiServices {
     if (kDebugMode) {
       print(url);
     }
-    dynamic responseJson ;
+    dynamic responseJson;
     try {
-      final response = await http.get(Uri.parse(url)).timeout( const Duration(seconds: 10));
-      responseJson  = _returnResponse(response) ;
-    }on SocketException {
-      throw InternetException('');
-    }on RequestTimeOut {
-      throw RequestTimeOut('Request Time out');
-    }
-    return responseJson ;
+      final sp = await SharedPreferences.getInstance();
+      String? token = sp.getString('accessToken');
 
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${token ?? ''}',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      responseJson = _returnResponse(response);
+    } on SocketException {
+      throw InternetException('');
+    } on TimeoutException {
+      throw RequestTimeOut('Request Time out');
+    } on Exception catch (e) {
+      _handleError(e);
+      rethrow; // Propagate the error up the chain
+    }
+    return responseJson;
   }
 
   @override

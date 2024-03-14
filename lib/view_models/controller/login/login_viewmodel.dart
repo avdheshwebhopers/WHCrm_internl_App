@@ -1,7 +1,6 @@
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:whsuites_calling/models/response_model/login_response_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -41,14 +40,13 @@ class LoginViewModel extends GetxController {
     try {
       final value = await _api.loginApi(data);
 
-
-
       if (value is Map<String, dynamic> && value.containsKey('accessToken')) {
         await _handleSuccessfulLogin(context, value);
       } else {
         Utils.errorAlertDialogue("Invalid Credentials", context);
       }
-    } catch (error) {
+    }
+    catch (error) {
       loading.value = false;
       if (kDebugMode) {
         print(error.toString());
@@ -90,7 +88,8 @@ class LoginViewModel extends GetxController {
       );
 
       Utils.successDialogue("Logged In Successfully", context);
-    } else {
+    }
+    else {
       Utils.errorAlertDialogue("Invalid Credentials", context);
     }
   }

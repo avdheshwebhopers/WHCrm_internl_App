@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -6,7 +5,6 @@ import '../../../data/network/network_api_services.dart';
 import '../../../res/app_url/app_urls.dart';
 import '../../../utils/utils.dart';
 import 'package:http/http.dart' as http;
-
 
 class CustomerDetailsViewModel extends GetxController {
 
@@ -20,6 +18,7 @@ class CustomerDetailsViewModel extends GetxController {
   var fromNumber = ''.obs;
   var toNumber = ''.obs;
   var calltype = ''.obs;
+  var fromsearch = false.obs;
   final loading = false.obs;
 
   Future<void> customerDetailApi(BuildContext context,
@@ -52,11 +51,6 @@ class CustomerDetailsViewModel extends GetxController {
       return;
     }
 
-    // Get the latest MP3 file path
-    // Check if the duration is 0
-
-    // Ensure the latest MP3 file data is not empty
-
     if (latestMp3FilePath.isEmpty) {
       loading.value = false;
       Utils.errorAlertDialogue("Latest MP3 file data is empty", context);
@@ -83,6 +77,7 @@ class CustomerDetailsViewModel extends GetxController {
         'from_number': fromNumber.value,
         'to_number': toNumber.value,
         'call_type': calltype.value,
+        'from_search': fromsearch.value.toString(),
       });
       // return;
     } else {
@@ -105,6 +100,7 @@ class CustomerDetailsViewModel extends GetxController {
         'from_number': fromNumber.value,
         'to_number': toNumber.value,
         'call_type': calltype.value,
+        'from_search': fromsearch.value.toString(),
       });
     }
 

@@ -20,11 +20,14 @@ class LeadDetailsViewModel extends GetxController {
   var fromNumber = ''.obs;
   var toNumber = ''.obs;
   var calltype = ''.obs;
+  var remark = ''.obs;
+  var fromsearch = false.obs;
   final loading = false.obs;
 
   Future<void> leadDetailApi(BuildContext context,
       Uint8List latestMp3FilePath) async {
     loading.value = true;
+
 
     // Define the list of fields to check for emptiness
     final fieldNames = [
@@ -35,10 +38,11 @@ class LeadDetailsViewModel extends GetxController {
       'From Number',
       'To Number',
       'Call Type'
+      'from search'
     ];
 
 
-    final fields = [ type, duration, date, fromNumber, toNumber , calltype];
+    final fields = [ type, duration, date, fromNumber, toNumber , calltype ];
 
     for (int i = 0; i < fields.length; i++) {
       if (fields[i].value.isEmpty) {
@@ -75,6 +79,8 @@ class LeadDetailsViewModel extends GetxController {
         'from_number': fromNumber.value,
         'to_number': toNumber.value,
         'call_type': calltype.value,
+        'remark': remark.value,
+        'from_search': fromsearch.value.toString()
       });
       // return;
     } else {
@@ -98,6 +104,8 @@ class LeadDetailsViewModel extends GetxController {
         'from_number': fromNumber.value,
         'to_number': toNumber.value,
         'call_type': calltype.value,
+        'remark': remark.value,
+        'from_search': fromsearch.value.toString(),
       });
     }
 
@@ -127,5 +135,3 @@ class LeadDetailsViewModel extends GetxController {
     }
   }
 }
-
-

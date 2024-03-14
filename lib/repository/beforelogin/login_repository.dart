@@ -33,8 +33,8 @@ class LoginRepository {
     return response;
   }
 
-  Future<dynamic> callTypeApi (var data) async {
-    dynamic response = await _apiService.postApiResponse( AppUrls.callType , data);
+  Future<dynamic> callTypeApi () async {
+    dynamic response = await _apiService.getApiResponse( AppUrls.callType);
     return response;
   }
 

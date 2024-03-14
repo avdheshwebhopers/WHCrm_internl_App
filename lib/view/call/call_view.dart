@@ -17,8 +17,10 @@ import 'package:whsuites_calling/res/colors/app_color.dart';
 import 'package:whsuites_calling/utils/text_style.dart';
 import 'package:whsuites_calling/view/call/CallControllers.dart';
 import 'package:whsuites_calling/view_models/controller/call_detail/lead_detail_viewmodel.dart';
+import 'package:whsuites_calling/view_models/controller/call_type/call_type_viewmodel.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../../models/response_model/call_type.dart';
 import '../../repository/beforelogin/login_repository.dart';
 import '../../res/routes/routes_name.dart';
 import '../../utils/utils.dart';
@@ -63,6 +65,10 @@ class CallView extends StatefulWidget {
 }
 
 class _CallViewState extends State<CallView> with WidgetsBindingObserver {
+
+  final CallTypeViewmodel _callTypeViewmodel = Get.find<CallTypeViewmodel>();
+  late Lead _lead;
+
   final LeadDetailsViewModel _leadDetailsViewModel = Get.find<
       LeadDetailsViewModel>();
   final CustomerDetailsViewModel _customerDetailsViewModel = Get.find<
@@ -87,11 +93,24 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-
-   // _fetchProfileApi();
     retrievePermissions();
     WidgetsBinding.instance.addObserver(this);
+    _callTypeViewmodel.callTypeApi();
+    _initData();
   }
+
+  Future<void> _initData() async {
+    // Call the API function from your view model
+    await _callTypeViewmodel.callTypeApi();
+    // Load lead data from shared preferences after calling the API
+    _lead = await CallTypeViewmodel.loadLeadCallType();
+    // // Print lead data
+    // print("Lead data: $_lead");
+    // print("Number Busy: ${_lead.numberBusy}");
+    // print("Answered: ${_lead.answered}");
+    // // Print other properties as needed
+  }
+
 
   @override
   void dispose() {
@@ -308,7 +327,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   void _setCallDetails(String phoneNumberToSearch,
       Uint8List latestMp3FilePath) {
     if (_type == "lead") {
-      _leadDetailsViewModel.id.value = _receivedID;
+      _leadDetailsViewModel.id.value = _receivedID.toString();
       _leadDetailsViewModel.type.value =
           _latestCallLogEntry?.callType.toString() ?? '';
       _leadDetailsViewModel.duration.value =
@@ -331,6 +350,11 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           _latestCallLogEntry?.simDisplayName?.toString() ?? "";
       _leadDetailsViewModel.toNumber.value =
           phoneNumberToSearch;
+
+      _leadDetailsViewModel.fromsearch.value = false;
+      _leadDetailsViewModel.remark.value = "Call placed";
+
+
       // print("to number is ${_latestCallLogEntry!.cachedMatchedNumber.toString()}");
 
       if (_latestCallLogEntry?.duration == 0) {
@@ -345,7 +369,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
       // print("data: $_receivedID ,$_type , $_answered , $_notAnswered");
     }
     else if (_type == "customer") {
-      _customerDetailsViewModel.id.value = _receivedID;
+      _customerDetailsViewModel.id.value = _receivedID.toString();
       _customerDetailsViewModel.type.value =
           _latestCallLogEntry?.callType.toString() ?? '';
       _customerDetailsViewModel.duration.value =
@@ -359,6 +383,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           _latestCallLogEntry?.simDisplayName?.toString() ?? "";
       _customerDetailsViewModel.toNumber.value =
           phoneNumberToSearch;
+      _customerDetailsViewModel.fromsearch.value =
+      false;
 
       if (_latestCallLogEntry?.duration == 0) {
         print("notanswered customer: ${_latestCallLogEntry
