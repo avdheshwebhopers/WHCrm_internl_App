@@ -351,7 +351,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
       _leadDetailsViewModel.toNumber.value =
           phoneNumberToSearch;
 
-      _leadDetailsViewModel.fromsearch.value = false;
       _leadDetailsViewModel.remark.value = "Call placed";
 
 
@@ -383,8 +382,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           _latestCallLogEntry?.simDisplayName?.toString() ?? "";
       _customerDetailsViewModel.toNumber.value =
           phoneNumberToSearch;
-      _customerDetailsViewModel.fromsearch.value =
-      false;
+
 
       if (_latestCallLogEntry?.duration == 0) {
         print("notanswered customer: ${_latestCallLogEntry

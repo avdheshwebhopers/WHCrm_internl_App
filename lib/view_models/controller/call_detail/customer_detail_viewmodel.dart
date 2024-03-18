@@ -18,7 +18,8 @@ class CustomerDetailsViewModel extends GetxController {
   var fromNumber = ''.obs;
   var toNumber = ''.obs;
   var calltype = ''.obs;
-  var fromsearch = false.obs;
+  var remark = ''.obs;
+  var createFrom = ''.obs;
   final loading = false.obs;
 
   Future<void> customerDetailApi(BuildContext context,
@@ -77,7 +78,8 @@ class CustomerDetailsViewModel extends GetxController {
         'from_number': fromNumber.value,
         'to_number': toNumber.value,
         'call_type': calltype.value,
-        'from_search': fromsearch.value.toString(),
+        'remark': remark.value,
+        'create_from': createFrom.value,
       });
       // return;
     } else {
@@ -100,7 +102,8 @@ class CustomerDetailsViewModel extends GetxController {
         'from_number': fromNumber.value,
         'to_number': toNumber.value,
         'call_type': calltype.value,
-        'from_search': fromsearch.value.toString(),
+        'remark': remark.value,
+        'create_from': createFrom.value,
       });
     }
 

@@ -21,7 +21,8 @@ class LeadDetailsViewModel extends GetxController {
   var toNumber = ''.obs;
   var calltype = ''.obs;
   var remark = ''.obs;
-  var fromsearch = false.obs;
+  var createFrom = ''.obs;
+  var reminder = ''.obs;
   final loading = false.obs;
 
   Future<void> leadDetailApi(BuildContext context,
@@ -38,7 +39,7 @@ class LeadDetailsViewModel extends GetxController {
       'From Number',
       'To Number',
       'Call Type'
-      'from search'
+      'Create From'
     ];
 
 
@@ -80,7 +81,8 @@ class LeadDetailsViewModel extends GetxController {
         'to_number': toNumber.value,
         'call_type': calltype.value,
         'remark': remark.value,
-        'from_search': fromsearch.value.toString()
+        'create_from': createFrom.value,
+        'reminder' : reminder.value
       });
       // return;
     } else {
@@ -105,7 +107,8 @@ class LeadDetailsViewModel extends GetxController {
         'to_number': toNumber.value,
         'call_type': calltype.value,
         'remark': remark.value,
-        'from_search': fromsearch.value.toString(),
+        'create_from': createFrom.value,
+        'reminder' : reminder.value
       });
     }
 
