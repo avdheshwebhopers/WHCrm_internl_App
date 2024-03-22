@@ -1,18 +1,13 @@
 import 'dart:io';
 
 import 'package:call_log/call_log.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:flutter/material.dart';
-
-import '../../models/response_model/call_type.dart';
 import '../../view_models/controller/call_detail/lead_detail_viewmodel.dart';
 import '../../view_models/controller/call_type/call_type_viewmodel.dart';
 
@@ -61,12 +56,14 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
   SongModel? _latestSong;
   DateTime? selectedDate;
 
+
   // Variable to store the selected lead data
   Map<String, dynamic>? _selectedLead;
 
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -99,53 +96,74 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
   void _onAppResumed() async {
     if (_callDisconnected && _selectedLead != null) {
       final String phoneNumberToSearch = "+91" + _selectedLead!['mobile'];
-      await _getCallLog(phoneNumberToSearch);
+      _getCallLog(phoneNumberToSearch);
       Uint8List latestMp3FilePath = await _getLatestMp3FileData();
       if (latestMp3FilePath.isNotEmpty) {
         _showDialogBox(phoneNumberToSearch, latestMp3FilePath);
       }
+      //_getCallLog(phoneNumberToSearch); // Fetch call logs each time app resumes
     }
   }
+
+  Future<void> _getCallLog  (String phoneNumberToSearch) async {
+    try {
+      final Iterable<CallLogEntry> result = await CallLog.query();
+      List<CallLogEntry> callLogs = result.toList();
+      setState(() {
+        for (CallLogEntry entry in callLogs) {
+          print('-------------------------------------');
+          print('Formatted Number: ${entry.formattedNumber}');
+          print('Cached Matched Number: ${entry.cachedMatchedNumber}');
+          print('Number: ${entry.number}');
+          print('Name: ${entry.name}');
+          print('Call Type: ${entry.callType}');
+          print('Date: ${DateTime.fromMillisecondsSinceEpoch(entry.timestamp!)}');
+          print('Duration: ${entry.duration}');
+          print('Phone Account ID: ${entry.phoneAccountId}');
+          print('SIM Display Name: ${entry.simDisplayName}');
+          print('-------------------------------------');
+        }
+        _latestCallLogEntry = callLogs.isNotEmpty ? callLogs.first : null;
+      });
+    } on PlatformException catch (e) {
+      print("Failed to get call logs: '${e.message}'.");
+    }
+  }
+
+
+
+
 
   Future<void> _showDialogBox(String phoneNumber, Uint8List mp3FileData) async {
     String text = ''; // Define text variable here
     String? selectedOption;
-    Lead leadData = await CallTypeViewmodel.loadLeadCallType();
-
+    var callTypeData = await CallTypeViewmodel.loadCallType();
 
     DateTime? selectedDateTime;
-    // Define this variable in your widget class
 
     selectedOption = await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text(""),
+        title: Text("ACTIVITY UPDATE" ,
+        style:  TextStyle(fontSize: 20.sp),),
         content: SingleChildScrollView(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: InputDecoration(hintText: "Enter your Remark"),
-                  onChanged: (value) => setState(() => text = value),
-                ),
-                SizedBox(height: 2.h),
-                ListTile(
-                  title:
-                   selectedDateTime == null
-                      ? Text('Select Date and Time' ,
-                   style: TextStyle( fontSize: 15.sp , fontWeight: FontWeight.w400),)
-                      : Text(' ${selectedDateTime.toString()}',
-                   style: TextStyle(fontSize: 15.sp , fontWeight: FontWeight.w500),),
-                  trailing: IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: () async {
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    decoration: InputDecoration(hintText: "Enter your Remark"),
+                    onChanged: (value) => setState(() => text = value),
+                  ),
+                  SizedBox(height: 2.h), // Adjust as needed
+                  GestureDetector(
+                    onTap: () async {
                       final DateTime? pickedDate = await showDatePicker(
                         context: context,
                         initialDate: DateTime.now(),
-                        firstDate: DateTime(2020),
+                        firstDate: DateTime.now(), // Restrict to today and onward
                         lastDate: DateTime(2101),
                       );
                       if (pickedDate != null) {
@@ -166,72 +184,65 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
                         }
                       }
                     },
+                    child: ListTile(
+                      title: selectedDateTime == null
+                          ? Text('Set Reminder', style: TextStyle(fontSize: 17.sp))
+                          : Text(
+                        ' ${selectedDateTime.toString()}',
+                        style: TextStyle(fontSize: 15.sp),
+                      ),
+                      trailing: Icon(Icons.calendar_today),
+                    ),
                   ),
-                ),
-                SizedBox(height: 1.h),
-                Divider(height: 1.h) ,
-                SizedBox(height: 2.h),
-
-                Text("Select your call type" , style: TextStyle(fontSize: 16.sp , fontWeight: FontWeight.w500),),
-                SizedBox(height: 1.h),
-
-                ListTile(
-                  title: Text('Answered' , style: TextStyle(fontSize: 16.sp ),),
-                  leading: Radio<String>(
-                    value: "${leadData.answered}",
-                    groupValue: selectedOption,
-                    onChanged: (String? value) {
-                      setState(() {
-                        selectedOption = value;
-                      });
-                    },
+                  SizedBox(height: 1.h),
+                  Divider(),
+                  SizedBox(height: 2.h),
+                  Text(
+                    "Your Duration is ${_latestCallLogEntry?.duration.toString()},",
+                    style: TextStyle(fontSize: 14.sp),
                   ),
-                ),
-                ListTile(
-                  title: Text('Not Answered', style: TextStyle(fontSize: 16.sp ),),
-                  leading: Radio<String>(
-                    value: "${leadData.notAnswered}",
-                    groupValue: selectedOption,
-                    onChanged: (String? value) {
-                      setState(() {
-                        selectedOption = value;
-                      });
-                    },
-                  ),
-                ),
-                ListTile(
-                  title: Text('Wrong Number', style: TextStyle(fontSize: 16.sp ),),
-                  leading: Radio<String>(
-                    value: "${leadData.wrongNumber}",
-                    groupValue: selectedOption,
-                    onChanged: (String? value) {
-                      setState(() {
-                        selectedOption = value;
-                      });
-                    },
-                  ),
-                ),
-                ListTile(
-                  title: Text('Number Busy', style: TextStyle(fontSize: 16.sp ),),
-                  leading: Radio<String>(
-                    value: "${leadData.numberBusy}",
-                    groupValue: selectedOption,
-                    onChanged: (String? value) {
-                      setState(() {
-                        selectedOption = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+                  SizedBox(height: 1.h),
+                  if (callTypeData.lead != null)
+                    DropdownButtonFormField<String>(
+                      value: selectedOption,
+                      hint: Text('Select Call Type'),
+                      onChanged: (String? value) {
+                        setState(() {
+                          selectedOption = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      ),
+                      style: TextStyle(fontSize: 16.0 , color: Colors.black87),
+                      items: callTypeData.lead!.keys.map((key) {
+                        return DropdownMenuItem<String>(
+                          value: callTypeData.lead![key],
+                          child: Text(key),
+                        );
+                      }).toList(),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
         actions: [
+          if (_latestCallLogEntry?.duration == 0)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text("Cancel"),
+            ),
           ElevatedButton(
             onPressed: () {
-              if (text.isNotEmpty && selectedOption != null && selectedDate != null) {
+              if (selectedOption != null) {
                 Navigator.pop(context, selectedOption);
               } else {
                 // Display an error message or handle incomplete form data
@@ -242,8 +253,11 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
         ],
       ),
     );
-    if (text != null && text.isNotEmpty && selectedOption != null) {
-      _setCallDetails(phoneNumber, mp3FileData, text, selectedOption!);
+    if (selectedOption != null) {
+      String formattedDateTime =
+          selectedDateTime?.toIso8601String() ?? ''; // Format DateTime to string
+      _setCallDetails(
+          phoneNumber, mp3FileData, text, selectedOption!, formattedDateTime);
     }
   }
 
@@ -266,24 +280,19 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
     return Uint8List(0);
   }
 
-  Future<void> _getCallLog(String phoneNumberToSearch) async {
-    final Iterable<CallLogEntry> result = await CallLog.query(number: phoneNumberToSearch);
-    setState(() {
-      _latestCallLogEntry = result.isNotEmpty ? result.first : null;
-    });
-  }
 
   Future<void> _makeCall(Map<String, dynamic> lead) async {
     try {
       await FlutterPhoneDirectCaller.callNumber(lead['mobile']);
+      _getCallLog("+91${lead['mobile']}"); // Fetch call logs after making a call
     } catch (e) {
       print('Error calling number: $e');
     }
   }
-
-  Future<void> _setCallDetails(String phoneNumberToSearch, Uint8List latestMp3FilePath , String remark , String selectedcalltype) async {
+  Future<void> _setCallDetails(String phoneNumberToSearch, Uint8List latestMp3FilePath , String remark , String selectedcalltype,
+      String reminder) async {
     String leadId = _selectedLead!['id'] ;
-    Lead leadData = await CallTypeViewmodel.loadLeadCallType();
+    dynamic leadData = await CallTypeViewmodel.loadCallType();
 
 
     _leadDetailsViewModel.id.value = leadId.toString() ?? '';
@@ -299,6 +308,7 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
     _leadDetailsViewModel.toNumber.value =
         phoneNumberToSearch;
    _leadDetailsViewModel.createFrom.value = 'mobile'.toString() ;
+   _leadDetailsViewModel.reminder.value = reminder.toString() ;
     print("createfrom: ${_leadDetailsViewModel.createFrom.value.toString()}");
 
     _leadDetailsViewModel.remark.value =
@@ -363,3 +373,5 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
     );
   }
 }
+
+

@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class CallControllers extends GetxController {
@@ -40,9 +41,12 @@ class CallControllers extends GetxController {
   }
 
   Future<void> initSocket() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? accessToken = sp.getString('accessToken');
     socket = io.io("https://webhopers.whsuites.com:3006/socket", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
+      'auth': {'token': accessToken}
     });
 
     socket.connect();

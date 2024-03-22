@@ -12,6 +12,10 @@ class GlobalSearchViewModel extends GetxController {
   RxList<LeadResult> leadResult = <LeadResult>[].obs;
   RxBool isLoading = false.obs;
 
+  // Properties to store the counts of search results
+  RxInt customerSearchCount = 0.obs;
+  RxInt leadSearchCount = 0.obs;
+
   List<Map<String, dynamic>> getCustomerData() {
     return customerResult.map((customer) {
       return {
@@ -52,18 +56,23 @@ class GlobalSearchViewModel extends GetxController {
         newCustomerResults = List<CustomerResult>.from(
             response['customerResult'].map((x) => CustomerResult.fromJson(x)));
 
-        print("customerresponse ${List<CustomerResult>.from(
-            response['customerResult'].map((x) => CustomerResult.fromJson(x)))}");
+        // Update customer search count
+        customerSearchCount.value = newCustomerResults.length;
       }
 
       if (response['leadResult'] != null) {
         newLeadResults = List<LeadResult>.from(
             response['leadResult'].map((x) => LeadResult.fromJson(x)));
+
+        // Update lead search count
+        leadSearchCount.value = newLeadResults.length;
       }
 
       // Update the customerResult and leadResult lists with new data
       customerResult.assignAll(newCustomerResults);
       leadResult.assignAll(newLeadResults);
+
+
     } catch (e) {
       // Handle any errors that occur during the API call
       print('Error fetching data: $e');

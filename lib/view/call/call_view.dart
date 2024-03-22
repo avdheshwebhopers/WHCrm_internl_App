@@ -67,7 +67,7 @@ class CallView extends StatefulWidget {
 class _CallViewState extends State<CallView> with WidgetsBindingObserver {
 
   final CallTypeViewmodel _callTypeViewmodel = Get.find<CallTypeViewmodel>();
-  late Lead _lead;
+  Map<String, dynamic>? _lead;
 
   final LeadDetailsViewModel _leadDetailsViewModel = Get.find<
       LeadDetailsViewModel>();
@@ -93,24 +93,26 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    retrievePermissions();
+    retrievePermissionsAndInitData();
     WidgetsBinding.instance.addObserver(this);
-    _callTypeViewmodel.callTypeApi();
-    _initData();
   }
 
   Future<void> _initData() async {
-    // Call the API function from your view model
-    await _callTypeViewmodel.callTypeApi();
-    // Load lead data from shared preferences after calling the API
-    _lead = await CallTypeViewmodel.loadLeadCallType();
-    // // Print lead data
-    // print("Lead data: $_lead");
-    // print("Number Busy: ${_lead.numberBusy}");
-    // print("Answered: ${_lead.answered}");
-    // // Print other properties as needed
-  }
+    try {
+      // Call the API function from your view model
+      await _callTypeViewmodel.callTypeApi();
+      // Load call type data from shared preferences after calling the API
+      var callType = await CallTypeViewmodel.loadCallType();
 
+      // Print lead and customer data
+      setState(() {
+        // Update the UI after loading data
+      });
+    } catch (e) {
+      // Handle error initializing data
+      print('Error initializing data: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -141,31 +143,61 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     }
   }
 
-  void retrievePermissions({bool retry = false}) async {
+  Future<void> retrievePermissionsAndInitData() async {
     try {
-      _hasPermission = await _audioQuery.checkAndRequest(retryRequest: retry);
-      if (_hasPermission) {
-        print("Permissions retrieved successfully.");
-        // Permissions granted, proceed with setup
+      // Retrieve permissions and wait for the result
+      bool hasPermission = await retrievePermissions();
+      if (hasPermission) {
+        // Proceed with initializing data
+        await _initData();
+
         setState(() {
           setupStreamListeners();
         });
       } else {
-        // Permissions denied
+        // Handle case where permissions are not granted
         print('Permissions denied for accessing audio resources.');
         // Optionally, you can prompt the user to grant permissions again
         // Or provide guidance on how to grant permissions manually
       }
-    } on PlatformException catch (e) {
-      // Platform-specific exception occurred
-      print('Platform exception occurred: $e');
-      // Handle specific platform exceptions if needed
     } catch (e) {
-      // Generic error occurred while checking or requesting permissions
-      print('Error retrieving permissions: $e');
-      // Optionally, handle the error gracefully or show an error message to the user
+      // Handle error retrieving permissions or initializing data
+      print('Error initializing data: $e');
     }
   }
+
+  Future<bool> retrievePermissions() async {
+    try {
+      // Check and request permissions
+      bool hasPermission = await _audioQuery.checkAndRequest();
+      if (hasPermission) {
+        print("Permissions retrieved successfully.");
+        // Request call log permissions specifically if not already granted
+        await _requestCallLogPermissionIfNeeded();
+      } else {
+        print('Permissions denied for accessing audio resources.');
+      }
+      return hasPermission;
+    } catch (e) {
+      // Handle error retrieving permissions
+      print('Error retrieving permissions: $e');
+      return false;
+    }
+  }
+
+  Future<void> _requestCallLogPermissionIfNeeded() async {
+    final status = await Permission.phone.status;
+    if (!status.isGranted) {
+      final result = await Permission.phone.request();
+      if (result.isGranted) {
+        print("Call log permission granted.");
+      } else {
+        print("Call log permission denied.");
+        // Optionally handle the case where call log permission is denied
+      }
+    }
+  }
+
 
   void setupStreamListeners() {
     _callControllers.receivedPhoneNumberStream.listen(_handleReceivedPhoneNumber);
@@ -332,6 +364,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           _latestCallLogEntry?.callType.toString() ?? '';
       _leadDetailsViewModel.duration.value =
           _latestCallLogEntry?.duration?.toString() ?? '';
+      _leadDetailsViewModel.createFrom.value = 'web'.toString() ;
       _leadDetailsViewModel.date.value = _latestCallLogEntry?.timestamp != null
           ? DateTime.fromMillisecondsSinceEpoch(_latestCallLogEntry!.timestamp!)
           .toString()

@@ -20,6 +20,7 @@ class CustomerDetailsViewModel extends GetxController {
   var calltype = ''.obs;
   var remark = ''.obs;
   var createFrom = ''.obs;
+  var reminder = ''.obs;
   final loading = false.obs;
 
   Future<void> customerDetailApi(BuildContext context,
@@ -80,6 +81,7 @@ class CustomerDetailsViewModel extends GetxController {
         'call_type': calltype.value,
         'remark': remark.value,
         'create_from': createFrom.value,
+        'reminder': reminder.value
       });
       // return;
     } else {
@@ -104,6 +106,7 @@ class CustomerDetailsViewModel extends GetxController {
         'call_type': calltype.value,
         'remark': remark.value,
         'create_from': createFrom.value,
+        'reminder': reminder.value,
       });
     }
 

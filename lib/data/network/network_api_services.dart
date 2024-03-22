@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../res/routes/routes_name.dart';
@@ -50,10 +49,11 @@ class NetworkApiServices extends BaseApiServices {
       ).timeout(const Duration(seconds: 10));
 
       responseJson = _returnResponse(response);
+    } on TimeoutException {
+    //  _showTimeoutDialog();
+      throw RequestTimeOut('Request Time out');
     } on SocketException {
       throw InternetException('');
-    } on TimeoutException {
-      throw RequestTimeOut('Request Time out');
     } on Exception catch (e) {
       _handleError(e);
       rethrow; // Propagate the error up the chain
@@ -250,7 +250,27 @@ Future<void> _logoutAndNavigateToSignIn() async {
   // Navigate to the login view and clear the entire navigation stack
   Get.offAllNamed(RouteName.loginView);
 }
-
+//
+// void _showTimeoutDialog() {
+//   showDialog(
+//     context: ,
+//     builder: (BuildContext context) {
+//       return AlertDialog(
+//         title: Text("Request Timeout"),
+//         content: Text("The request took too long to complete."),
+//         actions: [
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.of(context).pop();
+//             },
+//             child: Text("OK"),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
+//
 
 
 

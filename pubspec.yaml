@@ -36,26 +36,26 @@ dependencies:
 
   get: ^4.6.6
 
-  firebase_auth: ^4.15.3
-  firebase_messaging: ^14.7.9
-  firebase_analytics: ^10.7.4
-  flutter_local_notifications: ^14.1.0
+  firebase_auth: ^4.17.9
+  firebase_messaging: ^14.7.20
+  firebase_analytics: ^10.8.10
+  flutter_local_notifications: ^17.0.0
 
 
   another_flushbar: ^1.12.30
-  google_fonts: ^6.1.0
+  google_fonts: ^6.2.1
   socket_io_client: ^2.0.3+1
-  web_socket_channel: ^2.4.0
+  web_socket_channel: ^2.4.4
   flutter_phone_direct_caller: ^2.1.1
-  url_launcher: ^6.2.2
+  url_launcher: ^6.2.5
   phone_state_background: ^0.0.4
   call_log: ^4.0.0
   workmanager: ^0.5.2
   on_audio_query: ^2.9.0
   rxdart: ^0.27.7
-  permission_handler: ^11.1.0
+  permission_handler: ^11.3.0
   multipart: ^0.1.2
-  flutter_native_splash: ^2.3.9
+  flutter_native_splash: ^2.4.0
 
 
   shared_preferences: ^2.2.2

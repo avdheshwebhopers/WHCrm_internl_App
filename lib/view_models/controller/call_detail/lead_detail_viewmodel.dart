@@ -40,6 +40,7 @@ class LeadDetailsViewModel extends GetxController {
       'To Number',
       'Call Type'
       'Create From'
+      'Reminder'
     ];
 
 

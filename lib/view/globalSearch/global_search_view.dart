@@ -1,8 +1,7 @@
+import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../res/colors/app_color.dart';
@@ -20,7 +19,10 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _showTabs = false;
-  GlobalSearchViewModel viewModel = GlobalSearchViewModel(); // Flag to control visibility of tab views
+  GlobalSearchViewModel viewModel = GlobalSearchViewModel();
+  bool _searchClicked = false;
+  TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -32,12 +34,27 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
   @override
   void dispose() {
     _tabController.dispose();
-
+    _searchController.dispose(); // Dispose the search controller
     super.dispose();
-      }
+  }
 
   void _onSearchTextChanged(String value) {
-    viewModel.search(value);
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      // Debounce the search function
+      setState(() {
+        _searchClicked = false;
+      });
+    });
+  }
+
+  void _onSearchButtonClicked() {
+    setState(() {
+      _searchClicked = true;
+      _showTabs = true;
+      viewModel.search(
+          _searchController.text); // Perform search when search icon is clicked
+    });
   }
 
   @override
@@ -46,7 +63,6 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
       appBar: AppBar(
         toolbarHeight: 10.h,
         centerTitle: false,
-        automaticallyImplyLeading: false,
         elevation: 0,
         title: Text(
           'Global Search',
@@ -65,17 +81,14 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.w),
                       ),
                       suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _showTabs = !_showTabs; // Toggle visibility
-                          });
-                        },
+                        onPressed: _onSearchButtonClicked,
                         icon: Icon(
                           Icons.search,
                           color: AppColors.primaryColor,
@@ -88,61 +101,88 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
               ],
             ),
           ),
-          Visibility(
-            visible: _showTabs, // Show tab views only if _showTabs is true
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 3.0.h),
-              child: Container(
-                height: 7.h,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0.h),
-                  color: Colors.transparent,
-                ),
-                child: TabBar(
-                  splashFactory: NoSplash.splashFactory,
-                  labelColor: AppColors.primaryColor,
-                  unselectedLabelColor: Colors.black54,
-                  labelStyle: TextStyle(fontSize: 16.sp),
-                  dividerColor: Colors.transparent,
-                  tabs: <Widget>[
-                    Tab(
-                      child: Text(
-                        'Customer details',
-                        style: TextStyle(fontSize: 16.sp),
-                      ),
-                    ),
-                    Tab(
-                      child: Text(
-                        'Lead Details',
-                        style: TextStyle(fontSize: 16.sp),
-                      ),
-                    ),
-                  ],
-                  controller: _tabController,
-                ),
-              ),
-            ),
-          ),
-          Visibility(
-            visible: _showTabs, // Show tab views only if _showTabs is true
-            child: Expanded(
+          if (_showTabs && _searchClicked)
+            Expanded(
               child: Padding(
                 padding: EdgeInsets.all(2.h),
-                child: TabBarView(
-                  physics: ScrollPhysics(),
-                  controller: _tabController,
-                  children: <Widget>[
-                    Obx(() =>
-                    viewModel.isLoading.value? const Center(child: CircularProgressIndicator())
-                        : CustomerDetailsTab(data: viewModel.getCustomerData())),
-                    Obx(() =>
-                    viewModel.isLoading.value? const Center(child: CircularProgressIndicator())
-                        :LeadDetailsTab(data: viewModel.getLeadData())),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 7.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0.h),
+                        color: Colors.transparent,
+                      ),
+                      child: TabBar(
+                        splashFactory: NoSplash.splashFactory,
+                        labelColor: AppColors.primaryColor,
+                        unselectedLabelColor: Colors.black54,
+                        labelStyle: TextStyle(fontSize: 16.sp),
+                        dividerColor: Colors.transparent,
+                        tabs: <Widget>[
+                          Tab(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Customer details',
+                                  style: TextStyle(fontSize: 16.sp),
+                                ),
+                                SizedBox(width: 5),
+                                // Add spacing between text and count
+                                Obx(() =>
+                                    Text(
+                                      '(${viewModel.customerResult.length})',
+                                      // Display count dynamically
+                                      style: TextStyle(fontSize: 16.sp),
+                                    )),
+                              ],
+                            ),
+                          ),
+                          Tab(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Lead Details',
+                                  style: TextStyle(fontSize: 16.sp),
+                                ),
+                                SizedBox(width: 5),
+                                // Add spacing between text and count
+                                Obx(() =>
+                                    Text(
+                                      '(${viewModel.leadResult.length})',
+                                      // Display count dynamically
+                                      style: TextStyle(fontSize: 16.sp),
+                                    )),
+                              ],
+                            ),
+                          ),
+                        ],
+                        controller: _tabController,
+                      ),
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        physics: ScrollPhysics(),
+                        controller: _tabController,
+                        children: <Widget>[
+                          Obx(() =>
+                          viewModel.isLoading.value ? const Center(
+                              child: CircularProgressIndicator())
+                              : CustomerDetailsTab(
+                              data: viewModel.getCustomerData())),
+                          Obx(() =>
+                          viewModel.isLoading.value ? const Center(
+                              child: CircularProgressIndicator())
+                              : LeadDetailsTab(data: viewModel.getLeadData())),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
