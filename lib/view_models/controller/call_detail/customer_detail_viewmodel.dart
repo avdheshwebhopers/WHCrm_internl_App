@@ -24,7 +24,7 @@ class CustomerDetailsViewModel extends GetxController {
   final loading = false.obs;
 
   Future<void> customerDetailApi(BuildContext context,
-      Uint8List latestMp3FilePath) async {
+      Uint8List latestMp3FilePath , String directoryPath) async {
     loading.value = true;
 
     // Define the list of fields to check for emptiness
@@ -88,13 +88,26 @@ class CustomerDetailsViewModel extends GetxController {
       // ... your existing code to send the MP3 file
       // var url = AppUrls.leadDetailApi;
       // var request = http.MultipartRequest('POST', Uri.parse(url));
+      String originalExtension = directoryPath.split('.').last;
+
+      String filename = '${toNumber.value}.$originalExtension'; // Construct the filename with the original extension
+
       request.files.add(
         http.MultipartFile.fromBytes(
           'call_record',
           latestMp3FilePath,
-          filename: 'latest_song.mp3',
+          filename: filename,
         ),
       );
+
+      // Print the filename
+      print('Filename being sent: $filename');
+      print('pathis here ${directoryPath}');
+      // Log or print the request object to inspect it
+      print('Request object after adding file: $request');
+      // Log the size of the file being sent
+      print('File size: ${latestMp3FilePath.length} bytes');
+      // Add other fields to the request
       // Add other fields to the request
       request.fields.addAll({
         'id': id.value,
@@ -140,4 +153,3 @@ class CustomerDetailsViewModel extends GetxController {
     }
   }
 }
-

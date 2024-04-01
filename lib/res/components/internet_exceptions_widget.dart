@@ -43,7 +43,3 @@ class _InterNetExceptionWidgetState extends State<InterNetExceptionWidget> {
     );
   }
 }
-
-
-
-

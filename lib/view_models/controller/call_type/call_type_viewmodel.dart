@@ -1,8 +1,6 @@
 import 'dart:async';
-
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../models/response_model/call_type.dart';
 import '../../../repository/beforelogin/login_repository.dart';
 
@@ -22,9 +20,9 @@ class CallTypeViewmodel extends GetxController {
           CallType callType = CallType(lead: Map<String, dynamic>.from(leadData) , customer: Map<String, dynamic>.from(customerData));
           print("leadData: ${responseData['lead']}");
           await saveCallType(callType);
-        // } else if (responseData.containsKey('customer')) {
-         // var customerData = responseData['customer'];
-        //  CallType callType = CallType(customer: Map<String, dynamic>.from(customerData));
+          // } else if (responseData.containsKey('customer')) {
+          // var customerData = responseData['customer'];
+          //  CallType callType = CallType(customer: Map<String, dynamic>.from(customerData));
           print("customerData: ${responseData['customer']}");
         //  await saveCallType(callType);
         }
@@ -68,4 +66,3 @@ class CallTypeViewmodel extends GetxController {
     return CallType(lead: leadData.isNotEmpty ? leadData : null, customer: customerData.isNotEmpty ? customerData : null);
   }
 }
-

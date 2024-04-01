@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:call_log/call_log.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -12,6 +13,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whsuites_calling/res/assets/image_assets.dart';
 import 'package:whsuites_calling/res/colors/app_color.dart';
 import 'package:whsuites_calling/utils/text_style.dart';
@@ -20,12 +22,12 @@ import 'package:whsuites_calling/view_models/controller/call_detail/lead_detail_
 import 'package:whsuites_calling/view_models/controller/call_type/call_type_viewmodel.dart';
 import 'package:workmanager/workmanager.dart';
 
-import '../../models/response_model/call_type.dart';
 import '../../repository/beforelogin/login_repository.dart';
 import '../../res/routes/routes_name.dart';
 import '../../utils/utils.dart';
 import '../../view_models/controller/call_detail/customer_detail_viewmodel.dart';
 import '../../view_models/controller/user_preference/user_prefrence_view_model.dart';
+import 'package:path/path.dart' as path;
 
 
 void callbackDispatcher() {
@@ -87,6 +89,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   String _notAnswered = "";
 
   bool _hasPermission = false;
+  String _directoryPath = '';
+
   CallLogEntry? _latestCallLogEntry;
   final _api = LoginRepository();
 
@@ -99,6 +103,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
 
   Future<void> _initData() async {
     try {
+      _directoryPath = await _getDirectoryPathFromLocalStorage();
+
       // Call the API function from your view model
       await _callTypeViewmodel.callTypeApi();
       // Load call type data from shared preferences after calling the API
@@ -137,8 +143,9 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
       final String phoneNumberToSearch = "+91" + _phoneNumberController.text;
       await _getCallLog(phoneNumberToSearch);
       Uint8List latestMp3FilePath = await _getLatestMp3FileData();
+      String? latestMp3FileName = await _getLatestMp3FileName();
       if (latestMp3FilePath.isNotEmpty) {
-        _setCallDetails(phoneNumberToSearch, latestMp3FilePath);
+        _setCallDetails(phoneNumberToSearch, latestMp3FilePath , latestMp3FileName!);
       }
     }
   }
@@ -210,7 +217,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   void _handleReceivedPhoneNumber(String phoneNumber) {
     _updatePhoneNumber(phoneNumber);
     _callNumber(phoneNumber);
-    handleOutgoingCall(phoneNumber);
+   // handleOutgoingCall(phoneNumber);
   }
 
   void _handleReceivedID(String id) {
@@ -236,38 +243,37 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
       _notAnswered = notAnswered;
     });
   }
-
-  Future<void> makeCallInBackground(String phoneNumber) async {
-    try {
-      final backgroundChannel = MethodChannel('background_service');
-      await backgroundChannel.invokeMethod(
-          'makeCall', {'phoneNumber': _phoneNumberController});
-    } on PlatformException catch (e) {
-      print('Failed to make call in background: ${e.message}');
-    }
-  }
-
-  void handleOutgoingCall(String phoneNumber) {
-    // Check for necessary permissions
-    _checkPermissions().then((granted) {
-      if (granted) {
-        // Make call either in foreground or background
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          // Check app's lifecycle state
-          if (WidgetsBinding.instance.lifecycleState ==
-              AppLifecycleState.resumed) {
-            _makeCall(phoneNumber);
-          } else {
-            // App is in background, make call using background service
-            makeCallInBackground(phoneNumber);
-          }
-        });
-      } else {
-        // Handle case where permissions are not granted
-        print('Permissions not granted to make call.');
-      }
-    });
-  }
+  //
+  // Future<void> makeCallInBackground(String phoneNumber) async {
+  //   try {
+  //     final backgroundChannel = MethodChannel('background_service');
+  //     await backgroundChannel.invokeMethod(
+  //         'makeCall', {'phoneNumber': _phoneNumberController});
+  //   } on PlatformException catch (e) {
+  //     print('Failed to make call in background: ${e.message}');
+  //   }
+  // }
+  //
+  // void handleOutgoingCall(String phoneNumber) {
+  //   // Check for necessary permissions
+  //   _checkPermissions().then((granted) {
+  //     if (granted) {
+  //       // Make call either in foreground or background
+  //       WidgetsBinding.instance.addPostFrameCallback((_) {
+  //         // Check app's lifecycle state
+  //         if (WidgetsBinding.instance.lifecycleState ==
+  //             AppLifecycleState.resumed) {
+  //           _makeCall(phoneNumber);
+  //         } else {
+  //           // App is in background, make call using background service
+  //         }
+  //       });
+  //     } else {
+  //       // Handle case where permissions are not granted
+  //       print('Permissions not granted to make call.');
+  //     }
+  //   });
+  // }
 
   // Method to check necessary permissions
   Future<bool> _checkPermissions() async {
@@ -279,35 +285,100 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     return true;
   }
 
-  Future<void> _makeCall(String phoneNumber) async {
+
+
+
+
+  Future<String?> _selectDirectoryPath(BuildContext context) async {
     try {
-      await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+      // Open file picker to select directory
+      String? directoryPath = await FilePicker.platform.getDirectoryPath();
+      return directoryPath;
     } catch (e) {
-      print('Error calling number: $e');
+      print('Error selecting directory: $e');
+      return null;
     }
+  }
+
+
+  Future<void> saveDirectoryPath(String directoryPath) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('directoryPath', directoryPath);
+  }
+
+  Future<String> _getDirectoryPathFromLocalStorage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? directoryPath = prefs.getString('directoryPath');
+    if (directoryPath != null && directoryPath.isNotEmpty) {
+      return directoryPath;
+    } else {
+      throw Exception('Directory path not found in local storage');
+    }
+  }
+
+  Future<String?> _getLatestMp3FileName() async {
+    _directoryPath = await _getDirectoryPathFromLocalStorage();
+    if (_directoryPath.isEmpty) {
+      throw Exception('Directory path not found in local storage');
+    }
+
+    try {
+      Directory directory = Directory(_directoryPath);
+      List<FileSystemEntity> files = directory.listSync(recursive: true);
+      List<File> mp3Files = files
+          .where((file) => file.path.toLowerCase().endsWith('.mp3') || file.path.toLowerCase().endsWith('.aac') || file.path.toLowerCase().endsWith('.wav')
+          || file.path.toLowerCase().endsWith('.wma') || file.path.toLowerCase().endsWith('.dolby') || file.path.toLowerCase().endsWith('.digital') || file.path.toLowerCase().endsWith('.dts')
+          || file.path.toLowerCase().endsWith('.m4a'))
+          .map((file) => File(file.path))
+          .toList();
+
+      if (mp3Files.isNotEmpty) {
+        // Sort files by date modified to get the latest one
+        mp3Files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+
+        // Get the name of the latest mp3 file
+        String fileName = path.basename(mp3Files.first.path);
+        // print("filename in function is : $fileName");
+        return fileName;
+      }
+    } catch (e) {
+      print('Error accessing directory or reading file: $e');
+    }
+    return null; // Return null if no file found
   }
 
 
 
   Future<Uint8List> _getLatestMp3FileData() async {
-    List<SongModel> songs = await _audioQuery.querySongs(
-      sortType: SongSortType.DATE_ADDED,
-      orderType: OrderType.DESC_OR_GREATER,
-      uriType: UriType.EXTERNAL,
-      ignoreCase: true,
-    );
+    _directoryPath = await _getDirectoryPathFromLocalStorage();
+    if (_directoryPath.isEmpty) {
+      throw Exception('Directory path not found in local storage');
+    }
 
-    _latestSong = songs.isNotEmpty ? songs.first : null;
+    try {
+      Directory directory = Directory(_directoryPath);
+      List<FileSystemEntity> files = directory.listSync(recursive: true);
+      List<File> mp3Files = files
+          .where((file) => file.path.toLowerCase().endsWith('.mp3') || file.path.toLowerCase().endsWith('.aac') || file.path.toLowerCase().endsWith('.wav')
+          || file.path.toLowerCase().endsWith('.wma') || file.path.toLowerCase().endsWith('.dolby') || file.path.toLowerCase().endsWith('.digital') || file.path.toLowerCase().endsWith('.dts')
+          || file.path.toLowerCase().endsWith('.m4a'))          .map((file) => File(file.path))
+          .toList();
 
-    if (_latestSong != null && _latestSong!.data != null) {
-      String filePath = _latestSong!.data!;
-      File mp3File = File(filePath);
-      Uint8List fileData = await mp3File.readAsBytes();
-      return fileData;
+      if (mp3Files.isNotEmpty) {
+        // Sort files by date modified to get the latest one
+        mp3Files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+
+        // Read the latest mp3 file data
+        Uint8List fileData = await mp3Files.first.readAsBytes();
+        return fileData;
+      }
+    } catch (e) {
+      print('Error accessing directory or reading file: $e');
     }
 
     return Uint8List(0);
   }
+
 
   Future<bool> _showExitConfirmationDialog(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -348,16 +419,10 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     });
   }
 
-  void _callNumber(String phoneNumber) async {
-    try {
-      await FlutterPhoneDirectCaller.callNumber("+91" + phoneNumber);
-    } catch (e) {
-      print('Error calling number: $e');
-    }
-  }
+
 
   void _setCallDetails(String phoneNumberToSearch,
-      Uint8List latestMp3FilePath) {
+      Uint8List latestMp3FilePath , String filename) {
     if (_type == "lead") {
       _leadDetailsViewModel.id.value = _receivedID.toString();
       _leadDetailsViewModel.type.value =
@@ -396,7 +461,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
         print("answered: ${_latestCallLogEntry?.duration} , $_answered");
         _leadDetailsViewModel.calltype.value = _answered;
       }
-      _leadDetailsViewModel.leadDetailApi(context, latestMp3FilePath);
+      _leadDetailsViewModel.leadDetailApi(context, latestMp3FilePath , filename);
 
       // print("data: $_receivedID ,$_type , $_answered , $_notAnswered");
     }
@@ -416,18 +481,17 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
       _customerDetailsViewModel.toNumber.value =
           phoneNumberToSearch;
 
-
       if (_latestCallLogEntry?.duration == 0) {
         print("notanswered customer: ${_latestCallLogEntry
             ?.duration} , $_notAnswered");
         _customerDetailsViewModel.calltype.value = _notAnswered;
       } else {
-        print("answered: ${_latestCallLogEntry?.duration} , $_answered");
+        print("answered: ${_latestCallLogEntry?.duration} , $_answered , $latestMp3FilePath");
         _customerDetailsViewModel.calltype.value = _answered;
       }
       // print("data: $_receivedID ,$_type , $_answered , $_notAnswered");
 
-      _customerDetailsViewModel.customerDetailApi(context, latestMp3FilePath);
+      _customerDetailsViewModel.customerDetailApi(context, latestMp3FilePath , filename);
     }
     // Call the onComplete callback to signal that data sending is complete
     _clearReceivedID();
@@ -455,30 +519,82 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     Get.offAllNamed(RouteName.loginView);
   }
 
+  void _callNumber(String phoneNumber) async {
+    try {
+      final String directoryPath = await _getDirectoryPathFromLocalStorage();
+      print("directory path: $directoryPath");
 
-  @override
+      if (directoryPath.isNotEmpty) {
+        // Directory path is not empty, proceed with making the call
+        await FlutterPhoneDirectCaller.callNumber("+91" + phoneNumber);
+      }
+        // Directory path is empty, show dialog to select directory
+    } catch (e) {
+      await _showDirectorySelectionDialog();
+
+      print('Error making call: $e');
+    }
+  }
+
+  Future<void> _showDirectorySelectionDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Please Select Directory" ,
+          style: TextStyle(fontSize: 18.sp , fontWeight: FontWeight.w500),),
+          content: Text("You haven't selected a directory for recordings. Click on the folder Icon on the top right corner of the AppBar and Select the Directory first. "),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<String?> _getManualDirectoryPath(BuildContext context) {
+    TextEditingController controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Directory Path'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: 'Enter directory path'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+              child: Text('OK'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+
+@override
   Widget build(BuildContext context) {
     const TextStyle mono = TextStyle(fontFamily: 'monospace');
 
-    // final List<Widget> callLogWidgets = _latestCallLogEntry != null
-    //     ? [
-    //   const Divider(),
-    //   Text('F. NUMBER  : ${_latestCallLogEntry!.formattedNumber}', style: mono),
-    //   Text('C.M. NUMBER: ${_latestCallLogEntry!.cachedMatchedNumber}',
-    //       style: mono),
-    //   Text('NUMBER     : ${_latestCallLogEntry!.number}', style: mono),
-    //   Text('NAME       : ${_latestCallLogEntry!.name}', style: mono),
-    //   Text('TYPE       : ${_latestCallLogEntry!.callType}', style: mono),
-    //   Text(
-    //     'DATE       : ${DateTime.fromMillisecondsSinceEpoch(
-    //         _latestCallLogEntry!.timestamp!)}',
-    //     style: mono,
-    //   ),
-    //   Text('DURATION   : ${_latestCallLogEntry!.duration}', style: mono),
-    //   Text('ACCOUNT ID : ${_latestCallLogEntry!.phoneAccountId}', style: mono),
-    //   Text('SIM NAME   : ${_latestCallLogEntry!.simDisplayName}', style: mono),
-    // ]
-    //     : [];
 
     return WillPopScope(
       onWillPop: () async {
@@ -548,13 +664,33 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
       actions: [
         IconButton(
           onPressed: () async {
+            // Add logic to manually input directory path
+            String? manualDirectoryPath = await _getManualDirectoryPath(context);
+            if (manualDirectoryPath != null) {
+              await saveDirectoryPath(manualDirectoryPath);
+            }
+          },
+          icon: const Icon(Icons.add_circle),
+        ),
+        IconButton(
+          onPressed: () async {
+            // Add logic to choose directory path and save it locally
+            String? directoryPath = await _selectDirectoryPath(context);
+            if (directoryPath != null) {
+              await saveDirectoryPath(directoryPath);
+            }
+          },
+          icon: const Icon(Icons.folder),
+        ),
+        IconButton(
+          onPressed: () async {
             Utils.confirmationDialogue(
                 '', "ARE YOU SURE YOU WANT TO LOGOUT", () {
               onLogout();
             }, context);
           },
           icon: const Icon(Icons.logout),
-        )
+        ),
       ],
       backgroundColor: Colors.transparent, // Make app bar transparent
       elevation: 0, // Remove shadow from app bar
@@ -628,11 +764,30 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
                 child: Padding(
                   padding: const EdgeInsets.all(0),
                  child: GestureDetector(
-                    onTap: () {
-                      Get.toNamed(
-                      RouteName.globalSearchView
-                      );
-                      },
+                   onTap: () async {
+                     try {
+                       // Retrieve the directory path from local storage
+                       String? directoryPath = await _getDirectoryPathFromLocalStorage();
+                       if (directoryPath != null && directoryPath.isNotEmpty) {
+                         // Navigate to the global search view while passing the directory path
+                         Get.toNamed(
+                           RouteName.globalSearchView,
+                           arguments: directoryPath, // Pass directory path as argument
+                         );
+                       } else {
+                         // If directory path is not available, show a message to select a directory
+                         ScaffoldMessenger.of(context).showSnackBar(
+                           SnackBar(
+                             content: Text('Directory path not found. Please select a directory first.'),
+                           ),
+                         );
+                       }
+                     } catch (e) {
+                       // Handle any errors that occur while retrieving the directory path
+                       Utils.textError(context , "Directory path not found. Please select a directory first.",);
+                       print('Error retrieving directory path: $e');
+                     }
+                   },
           child: Card(
             elevation: 0.5.w,
             margin: EdgeInsets.all(6.w),

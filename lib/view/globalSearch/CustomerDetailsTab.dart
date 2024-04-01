@@ -10,6 +10,7 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:whsuites_calling/view_models/controller/call_detail/customer_detail_viewmodel.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:path/path.dart' as path;
 
 import '../../view_models/controller/call_type/call_type_viewmodel.dart';
 
@@ -44,9 +45,10 @@ void callbackDispatcher() {
 }
 
 class CustomerDetailsTab extends StatefulWidget {
+  final String directoryPath;
   final List<Map<String, dynamic>> data;
 
-  const CustomerDetailsTab({Key? key, required this.data}) : super(key: key);
+  const CustomerDetailsTab({Key? key, required this.data, required this.directoryPath}) : super(key: key);
 
   @override
   _CustomerDetailsTabState createState() => _CustomerDetailsTabState();
@@ -100,25 +102,30 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
       final String phoneNumberToSearch = "+91" + _selectedcustomer!['primary_contact'];
       _getCallLog(phoneNumberToSearch); // Fetch call logs each time app resumes
       Uint8List latestMp3FilePath = await _getLatestMp3FileData();
+      String? latestMp3FileName = await _getLatestMp3FileName();
       if (latestMp3FilePath.isNotEmpty) {
-        _showDialogBox(phoneNumberToSearch, latestMp3FilePath);
+        _showDialogBox(phoneNumberToSearch, latestMp3FilePath , latestMp3FileName!);
       }
     }
   }
 
-  Future<void> _showDialogBox(String phoneNumber, Uint8List mp3FileData) async {
+  Future<void> _showDialogBox(String phoneNumber, Uint8List mp3FileData , String mp3FileName) async {
     String text = ''; // Define text variable here
     String? selectedOption;
     var callTypeData = await CallTypeViewmodel.loadCallType();
 
     DateTime? selectedDateTime;
 
+    TextEditingController remarkController = TextEditingController(); // Add text controller
+
     selectedOption = await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text("ACTIVITY UPDATE" ,
-          style:  TextStyle(fontSize: 20.sp),),
+        title: Text(
+          "ACTIVITY UPDATE",
+          style: TextStyle(fontSize: 20.sp),
+        ),
         content: SingleChildScrollView(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -126,8 +133,9 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
+                    controller: remarkController, // Add text controller here
                     decoration: InputDecoration(hintText: "Enter your Remark"),
-                    onChanged: (value) => setState(() => text = value),
+                    onChanged: (value) => text = value,
                   ),
                   SizedBox(height: 2.h), // Adjust as needed
                   GestureDetector(
@@ -181,6 +189,7 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
                       onChanged: (String? value) {
                         setState(() {
                           selectedOption = value;
+                          remarkController.text = callTypeData.lead!.keys.firstWhere((key) => callTypeData.lead![key] == value, orElse: () => ''); // Update remark field
                         });
                       },
                       decoration: InputDecoration(
@@ -215,7 +224,11 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
           ElevatedButton(
             onPressed: () {
               if (selectedOption != null) {
-                Navigator.pop(context, selectedOption);
+                String formattedDateTime =
+                    selectedDateTime?.toIso8601String() ?? ''; // Format DateTime to string
+                _setCallDetails(
+                    phoneNumber, mp3FileData, text, selectedOption!, formattedDateTime , mp3FileName);
+                Navigator.pop(context, selectedOption );
               } else {
                 // Display an error message or handle incomplete form data
               }
@@ -225,29 +238,63 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
         ],
       ),
     );
-    if (selectedOption != null) {
-      String formattedDateTime =
-          selectedDateTime?.toIso8601String() ?? ''; // Format DateTime to string
-      _setCallDetails(
-          phoneNumber, mp3FileData, text, selectedOption!, formattedDateTime);
-    }
   }
 
+  Future<String?> _getLatestMp3FileName() async {
+    if (widget.directoryPath.isEmpty) {
+      throw Exception('Directory path not found in local storage');
+    }
+
+    try {
+      Directory directory = Directory(widget.directoryPath);
+      List<FileSystemEntity> files = directory.listSync(recursive: true);
+      List<File> mp3Files = files
+          .where((file) => file.path.toLowerCase().endsWith('.mp3') || file.path.toLowerCase().endsWith('.aac') || file.path.toLowerCase().endsWith('.wav')
+          || file.path.toLowerCase().endsWith('.wma') || file.path.toLowerCase().endsWith('.dolby') || file.path.toLowerCase().endsWith('.digital') || file.path.toLowerCase().endsWith('.dts')
+          || file.path.toLowerCase().endsWith('.m4a'))
+          .map((file) => File(file.path))
+          .toList();
+
+      if (mp3Files.isNotEmpty) {
+        // Sort files by date modified to get the latest one
+        mp3Files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+
+        // Get the name of the latest mp3 file
+        String fileName = path.basename(mp3Files.first.path);
+        // print("filename in function is : $fileName");
+        return fileName;
+      }
+    } catch (e) {
+      print('Error accessing directory or reading file: $e');
+    }
+    return null; // Return null if no file found
+  }
+
+
   Future<Uint8List> _getLatestMp3FileData() async {
-    List<SongModel> songs = await _audioQuery.querySongs(
-      sortType: SongSortType.DATE_ADDED,
-      orderType: OrderType.DESC_OR_GREATER,
-      uriType: UriType.EXTERNAL,
-      ignoreCase: true,
-    );
+    if (widget.directoryPath.isEmpty) {
+      throw Exception('Directory path not found in local storage');
+    }
 
-    _latestSong = songs.isNotEmpty ? songs.first : null;
+    try {
+      Directory directory = Directory(widget.directoryPath);
+      List<FileSystemEntity> files = directory.listSync(recursive: true);
+      List<File> mp3Files = files
+          .where((file) => file.path.toLowerCase().endsWith('.mp3') || file.path.toLowerCase().endsWith('.aac') || file.path.toLowerCase().endsWith('.wav')
+          || file.path.toLowerCase().endsWith('.wma') || file.path.toLowerCase().endsWith('.dolby') || file.path.toLowerCase().endsWith('.digital') || file.path.toLowerCase().endsWith('.dts')
+          || file.path.toLowerCase().endsWith('.m4a'))          .map((file) => File(file.path))
+          .toList();
 
-    if (_latestSong != null && _latestSong!.data != null) {
-      String filePath = _latestSong!.data!;
-      File mp3File = File(filePath);
-      Uint8List fileData = await mp3File.readAsBytes();
-      return fileData;
+      if (mp3Files.isNotEmpty) {
+        // Sort files by date modified to get the latest one
+        mp3Files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+
+        // Read the latest mp3 file data
+        Uint8List fileData = await mp3Files.first.readAsBytes();
+        return fileData;
+      }
+    } catch (e) {
+      print('Error accessing directory or reading file: $e');
     }
     return Uint8List(0);
   }
@@ -287,7 +334,7 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
   }
 
   Future<void> _setCallDetails(String phoneNumberToSearch, Uint8List latestMp3FilePath , String remark , String selectedcalltype,
-      String reminder) async {
+      String reminder , String filename) async {
     String leadId = _selectedcustomer!['id'] ;
     dynamic customerData = await CallTypeViewmodel.loadCallType();
 
@@ -326,7 +373,7 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
     //   _leadDetailsViewModel.calltype.value = leadData.answered ?? "";
     // }
 
-    _customerDetailsViewModel.customerDetailApi(context, latestMp3FilePath);
+    _customerDetailsViewModel.customerDetailApi(context, latestMp3FilePath, filename);
   }
   @override
   Widget build(BuildContext context) {

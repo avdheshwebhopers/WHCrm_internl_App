@@ -17,4 +17,3 @@ class CallType {
     return data;
   }
 }
-

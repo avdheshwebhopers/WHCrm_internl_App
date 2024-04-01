@@ -1,9 +1,7 @@
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-
 import '../../../models/response_model/global_search_model.dart';
 import '../../../repository/beforelogin/login_repository.dart';
-
 
 class GlobalSearchViewModel extends GetxController {
   final _api = LoginRepository();
@@ -71,7 +69,6 @@ class GlobalSearchViewModel extends GetxController {
       // Update the customerResult and leadResult lists with new data
       customerResult.assignAll(newCustomerResults);
       leadResult.assignAll(newLeadResults);
-
 
     } catch (e) {
       // Handle any errors that occur during the API call

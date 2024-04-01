@@ -3,16 +3,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../data/network/network_api_services.dart';
-
 import '../../../res/app_url/app_urls.dart';
 import '../../../utils/utils.dart';
 import 'package:http/http.dart' as http;
+// import 'package:path/path.dart' as path;
+
 
 class LeadDetailsViewModel extends GetxController {
 
   final _apiService = NetworkApiServices();
 
   // Observable variables for call details
+
   var id = ''.obs;
   var type = ''.obs;
   var duration = ''.obs;
@@ -26,7 +28,7 @@ class LeadDetailsViewModel extends GetxController {
   final loading = false.obs;
 
   Future<void> leadDetailApi(BuildContext context,
-      Uint8List latestMp3FilePath) async {
+      Uint8List latestMp3FilePath , String directoryPath) async {
     loading.value = true;
 
 
@@ -87,17 +89,26 @@ class LeadDetailsViewModel extends GetxController {
       });
       // return;
     } else {
-      // ... your existing code to send the MP3 file
-      // var url = AppUrls.leadDetailApi;
-      // var request = http.MultipartRequest('POST', Uri.parse(url));
-      print("file name is :  ${toNumber.value}");
+
+      String originalExtension = directoryPath.split('.').last;
+
+      String filename = '${toNumber.value}.$originalExtension'; // Construct the filename with the original extension
+
       request.files.add(
         http.MultipartFile.fromBytes(
           'call_record',
           latestMp3FilePath,
-          filename: '${toNumber.value}.mp3',
+          filename: filename,
         ),
       );
+
+// Print the filename
+      print('Filename being sent: $filename');
+      print('pathis here ${directoryPath}');
+      // Log or print the request object to inspect it
+      print('Request object after adding file: $request');
+      // Log the size of the file being sent
+      print('File size: ${latestMp3FilePath.length} bytes');
       // Add other fields to the request
       request.fields.addAll({
         'id': id.value,
@@ -139,3 +150,4 @@ class LeadDetailsViewModel extends GetxController {
     }
   }
 }
+

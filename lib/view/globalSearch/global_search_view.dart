@@ -23,12 +23,16 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
   bool _searchClicked = false;
   TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
+  late String _directoryPath; // Variable to store the directory path
+
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     viewModel = Get.put(GlobalSearchViewModel());
+    _directoryPath = Get.arguments as String; // Retrieve directory path from route arguments
+
   }
 
   @override
@@ -171,11 +175,14 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
                           viewModel.isLoading.value ? const Center(
                               child: CircularProgressIndicator())
                               : CustomerDetailsTab(
+                              directoryPath: _directoryPath,
                               data: viewModel.getCustomerData())),
                           Obx(() =>
                           viewModel.isLoading.value ? const Center(
                               child: CircularProgressIndicator())
-                              : LeadDetailsTab(data: viewModel.getLeadData())),
+                              : LeadDetailsTab(
+                              directoryPath: _directoryPath,
+                              data: viewModel.getLeadData())),
                         ],
                       ),
                     ),
