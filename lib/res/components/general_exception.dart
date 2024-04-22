@@ -10,12 +10,14 @@ class GeneralExceptionWidget extends StatefulWidget {
 
   @override
   State<GeneralExceptionWidget> createState() => _GeneralExceptionWidgetState();
+
 }
 
-
 class _GeneralExceptionWidgetState extends State<GeneralExceptionWidget> {
+
   @override
   Widget build(BuildContext context) {
+
     final height = MediaQuery.of(context).size.height ;
     return  Padding(
       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -44,6 +46,5 @@ class _GeneralExceptionWidgetState extends State<GeneralExceptionWidget> {
       ),
     );
   }
+
 }
-
-

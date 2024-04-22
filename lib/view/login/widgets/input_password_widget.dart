@@ -13,6 +13,7 @@ class InputPasswordWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return  PasswordInputField(
       controller: loginVM.passwordController.value,
       focusNode: loginVM.passwordFocusNode.value,
@@ -30,6 +31,5 @@ class InputPasswordWidget extends StatelessWidget {
       },
     );
   }
+
 }
-
-

@@ -1,4 +1,3 @@
-
 class LoginResponseModel {
   String? accessToken;
   User? user;
@@ -55,5 +54,5 @@ class User {
     data['crm_category'] = crmCategory;
     return data;
   }
-}
 
+}

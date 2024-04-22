@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -8,9 +7,7 @@ import '../../../utils/utils.dart';
 import 'package:http/http.dart' as http;
 // import 'package:path/path.dart' as path;
 
-
 class LeadDetailsViewModel extends GetxController {
-
   final _apiService = NetworkApiServices();
 
   // Observable variables for call details
@@ -31,7 +28,6 @@ class LeadDetailsViewModel extends GetxController {
       Uint8List latestMp3FilePath , String directoryPath) async {
     loading.value = true;
 
-
     // Define the list of fields to check for emptiness
     final fieldNames = [
       'ID',
@@ -44,7 +40,6 @@ class LeadDetailsViewModel extends GetxController {
       'Create From'
       'Reminder'
     ];
-
 
     final fields = [ type, duration, date, fromNumber, toNumber , calltype ];
 
@@ -89,7 +84,6 @@ class LeadDetailsViewModel extends GetxController {
       });
       // return;
     } else {
-
       String originalExtension = directoryPath.split('.').last;
 
       String filename = '${toNumber.value}.$originalExtension'; // Construct the filename with the original extension
@@ -150,4 +144,3 @@ class LeadDetailsViewModel extends GetxController {
     }
   }
 }
-

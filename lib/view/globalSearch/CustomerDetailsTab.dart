@@ -1,6 +1,4 @@
-
 import 'dart:io';
-
 import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,9 +9,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:whsuites_calling/view_models/controller/call_detail/customer_detail_viewmodel.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:path/path.dart' as path;
-
 import '../../view_models/controller/call_type/call_type_viewmodel.dart';
-
 
 void callbackDispatcher() {
   Workmanager().executeTask((dynamic task, dynamic inputData) async {
@@ -93,8 +89,6 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
       _selectedcustomer = customer;
     });
   }
-
-
 
   // Method to handle app resumed
   void _onAppResumed() async {
@@ -275,7 +269,6 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
     if (widget.directoryPath.isEmpty) {
       throw Exception('Directory path not found in local storage');
     }
-
     try {
       Directory directory = Directory(widget.directoryPath);
       List<FileSystemEntity> files = directory.listSync(recursive: true);
@@ -337,8 +330,6 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
       String reminder , String filename) async {
     String leadId = _selectedcustomer!['id'] ;
     dynamic customerData = await CallTypeViewmodel.loadCallType();
-
-
     _customerDetailsViewModel.id.value = leadId.toString() ?? '';
 
     _customerDetailsViewModel.type.value = _latestCallLogEntry?.callType.toString() ?? '';
@@ -414,3 +405,5 @@ class _CustomerDetailsTabState extends State<CustomerDetailsTab> with WidgetsBin
     );
   }
 }
+
+

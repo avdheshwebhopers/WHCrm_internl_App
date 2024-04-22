@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:call_log/call_log.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
@@ -36,7 +35,7 @@ void callbackDispatcher() {
     } on PlatformException catch (e, s) {
       print(e);
       print(s);
-      print("callog permission");
+      print("call logs permission");
       return true;
     }
   });
@@ -45,8 +44,6 @@ void callbackDispatcher() {
 class LeadDetailsTab extends StatefulWidget {
   final String directoryPath;
   final List<Map<String, dynamic>> data;
-
-
   const LeadDetailsTab({Key? key, required this.data, required this.directoryPath}) : super(key: key);
 
   @override
@@ -60,14 +57,12 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
   SongModel? _latestSong;
   DateTime? selectedDate;
 
-
   // Variable to store the selected lead data
   Map<String, dynamic>? _selectedLead;
 
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -115,19 +110,6 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
       final Iterable<CallLogEntry> result = await CallLog.query();
       List<CallLogEntry> callLogs = result.toList();
       setState(() {
-        // for (CallLogEntry entry in callLogs) {
-        //   print('-------------------------------------');
-        //   print('Formatted Number: ${entry.formattedNumber}');
-        //   print('Cached Matched Number: ${entry.cachedMatchedNumber}');
-        //   print('Number: ${entry.number}');
-        //   print('Name: ${entry.name}');
-        //   print('Call Type: ${entry.callType}');
-        //   print('Date: ${DateTime.fromMillisecondsSinceEpoch(entry.timestamp!)}');
-        //   print('Duration: ${entry.duration}');
-        //   print('Phone Account ID: ${entry.phoneAccountId}');
-        //   print('SIM Display Name: ${entry.simDisplayName}');
-        //   print('-------------------------------------');
-        // }
         _latestCallLogEntry = callLogs.isNotEmpty ? callLogs.first : null;
       });
     } on PlatformException catch (e) {
@@ -135,15 +117,11 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
     }
   }
 
-
-
   Future<void> _showDialogBox(String phoneNumber, Uint8List mp3FileData , String mp3FileName) async {
     String text = ''; // Define text variable here
     String? selectedOption;
     var callTypeData = await CallTypeViewmodel.loadCallType();
-
     DateTime? selectedDateTime;
-
     TextEditingController remarkController = TextEditingController(); // Add text controller
 
     selectedOption = await showDialog(
@@ -267,13 +245,6 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
       ),
     );
   }
-  //   if (selectedOption != null) {
-  //     String formattedDateTime =
-  //         selectedDateTime?.toIso8601String() ?? ''; // Format DateTime to string
-  //     _setCallDetails(
-  //         phoneNumber, mp3FileData, text, selectedOption!, formattedDateTime);
-  //   }
-  // }
 
   Future<String?> _getLatestMp3FileName() async {
     if (widget.directoryPath.isEmpty) {
@@ -309,7 +280,6 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
     if (widget.directoryPath.isEmpty) {
       throw Exception('Directory path not found in local storage');
     }
-
     try {
       Directory directory = Directory(widget.directoryPath);
       List<FileSystemEntity> files = directory.listSync(recursive: true);
@@ -336,7 +306,6 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
     return Uint8List(0);
   }
 
-
   Future<void> _makeCall(Map<String, dynamic> lead) async {
     try {
       await FlutterPhoneDirectCaller.callNumber(lead['mobile']);
@@ -345,20 +314,18 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
       print('Error calling number: $e');
     }
   }
+
   Future<void> _setCallDetails(String phoneNumberToSearch, Uint8List latestMp3FilePath , String remark , String selectedcalltype,
       String reminder , String filename) async {
     String leadId = _selectedLead!['id'] ;
     dynamic leadData = await CallTypeViewmodel.loadCallType();
 
-
     _leadDetailsViewModel.id.value = leadId.toString() ?? '';
-
     _leadDetailsViewModel.type.value = _latestCallLogEntry?.callType.toString() ?? '';
     _leadDetailsViewModel.duration.value = _latestCallLogEntry?.duration?.toString() ?? '';
     _leadDetailsViewModel.date.value = _latestCallLogEntry?.timestamp != null
         ? DateTime.fromMillisecondsSinceEpoch(_latestCallLogEntry!.timestamp!).toString()
         : '';
-
     _leadDetailsViewModel.fromNumber.value =
         _latestCallLogEntry?.simDisplayName?.toString() ?? "";
     _leadDetailsViewModel.toNumber.value =
@@ -366,26 +333,11 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
    _leadDetailsViewModel.createFrom.value = 'mobile'.toString() ;
    _leadDetailsViewModel.reminder.value = reminder.toString() ;
     print("createfrom: ${_leadDetailsViewModel.createFrom.value.toString()}");
-
     _leadDetailsViewModel.remark.value =
         remark.toString();
-    // print("to number is ${_latestCallLogEntry!.cachedMatchedNumber.toString()}");
-
-
-    // Set from number based on answered or not answered
     _leadDetailsViewModel.calltype.value = selectedcalltype.toString() ?? "";
        print("notanswered: ${_leadDetailsViewModel.id.value.toString()} , ${_leadDetailsViewModel.type.value} , ${_leadDetailsViewModel.duration.value},"
-           " ${_leadDetailsViewModel.date.value} , ${_leadDetailsViewModel.fromNumber.value } , ${_leadDetailsViewModel.toNumber.value } , ${_leadDetailsViewModel.remark.value } ${selectedcalltype}");
-
-    // if (_latestCallLogEntry?.duration == 0) {
-    //   print("notanswered: ${_latestCallLogEntry?.duration} , ${leadData.notAnswered}");
-    //   _leadDetailsViewModel.calltype.value = leadData.notAnswered ?? "";
-    // } else {
-    //   print("answered: ${_latestCallLogEntry?.duration} , ${leadData.answered}");
-    //   _leadDetailsViewModel.calltype.value = leadData.answered ?? "";
-    // }
-    _leadDetailsViewModel.leadDetailApi(context, latestMp3FilePath , filename );
-
+           " ${_leadDetailsViewModel.date.value} , ${_leadDetailsViewModel.fromNumber.value } , ${_leadDetailsViewModel.toNumber.value } , ${_leadDetailsViewModel.remark.value } ${selectedcalltype}");_leadDetailsViewModel.leadDetailApi(context, latestMp3FilePath , filename );
   }
 
   @override
@@ -428,5 +380,3 @@ class _LeadDetailsTabState extends State<LeadDetailsTab> with WidgetsBindingObse
     );
   }
 }
-
-

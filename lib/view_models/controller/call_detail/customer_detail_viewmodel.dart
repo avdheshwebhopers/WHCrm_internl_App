@@ -148,7 +148,9 @@ class CustomerDetailsViewModel extends GetxController {
       loading.value = false;
       print('Error sending request: $error');
       if (kDebugMode) {
+
         print(error.toString());
+
       }
     }
   }

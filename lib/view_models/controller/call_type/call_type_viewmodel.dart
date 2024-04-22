@@ -20,9 +20,6 @@ class CallTypeViewmodel extends GetxController {
           CallType callType = CallType(lead: Map<String, dynamic>.from(leadData) , customer: Map<String, dynamic>.from(customerData));
           print("leadData: ${responseData['lead']}");
           await saveCallType(callType);
-          // } else if (responseData.containsKey('customer')) {
-          // var customerData = responseData['customer'];
-          //  CallType callType = CallType(customer: Map<String, dynamic>.from(customerData));
           print("customerData: ${responseData['customer']}");
         //  await saveCallType(callType);
         }

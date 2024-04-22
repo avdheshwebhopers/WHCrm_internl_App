@@ -49,7 +49,6 @@ class CallDetailsViewModel extends GetxController {
 
     // Get the latest MP3 file path
     // Check if the duration is 0
-
     // Ensure the latest MP3 file data is not empty
 
     if (latestMp3FilePath.isEmpty) {
@@ -112,4 +111,5 @@ class CallDetailsViewModel extends GetxController {
       }
     }
   }
+
 }

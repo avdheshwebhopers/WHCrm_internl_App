@@ -1,6 +1,4 @@
-
 import 'dart:async';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +11,6 @@ class CallControllers extends GetxController {
   final RxString type = RxString('');
   final RxString answered = RxString('');
   final RxString notAnswered = RxString('');
-
   String accessToken = '';
 
   final _receivedPhoneNumberController = StreamController<String>();
@@ -110,5 +107,3 @@ class CallControllers extends GetxController {
     }
   }
 }
-
-

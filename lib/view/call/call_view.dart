@@ -1,7 +1,6 @@
 
 import 'dart:async';
 import 'dart:io';
-
 import 'package:call_log/call_log.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,6 @@ import 'package:whsuites_calling/view/call/CallControllers.dart';
 import 'package:whsuites_calling/view_models/controller/call_detail/lead_detail_viewmodel.dart';
 import 'package:whsuites_calling/view_models/controller/call_type/call_type_viewmodel.dart';
 import 'package:workmanager/workmanager.dart';
-
 import '../../repository/beforelogin/login_repository.dart';
 import '../../res/routes/routes_name.dart';
 import '../../utils/utils.dart';
@@ -205,7 +203,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     }
   }
 
-
   void setupStreamListeners() {
     _callControllers.receivedPhoneNumberStream.listen(_handleReceivedPhoneNumber);
     _callControllers.receivedIDStream.listen(_handleReceivedID);
@@ -285,10 +282,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     return true;
   }
 
-
-
-
-
   Future<String?> _selectDirectoryPath(BuildContext context) async {
     try {
       // Open file picker to select directory
@@ -347,8 +340,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     return null; // Return null if no file found
   }
 
-
-
   Future<Uint8List> _getLatestMp3FileData() async {
     _directoryPath = await _getDirectoryPathFromLocalStorage();
     if (_directoryPath.isEmpty) {
@@ -378,7 +369,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
 
     return Uint8List(0);
   }
-
 
   Future<bool> _showExitConfirmationDialog(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -419,8 +409,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     });
   }
 
-
-
   void _setCallDetails(String phoneNumberToSearch,
       Uint8List latestMp3FilePath , String filename) {
     if (_type == "lead") {
@@ -448,12 +436,8 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
           _latestCallLogEntry?.simDisplayName?.toString() ?? "";
       _leadDetailsViewModel.toNumber.value =
           phoneNumberToSearch;
-
       _leadDetailsViewModel.remark.value = "Call placed";
-
-
       // print("to number is ${_latestCallLogEntry!.cachedMatchedNumber.toString()}");
-
       if (_latestCallLogEntry?.duration == 0) {
         print("notanswered: ${_latestCallLogEntry?.duration} , $_notAnswered");
         _leadDetailsViewModel.calltype.value = _notAnswered;
@@ -490,7 +474,6 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
         _customerDetailsViewModel.calltype.value = _answered;
       }
       // print("data: $_receivedID ,$_type , $_answered , $_notAnswered");
-
       _customerDetailsViewModel.customerDetailApi(context, latestMp3FilePath , filename);
     }
     // Call the onComplete callback to signal that data sending is complete
@@ -588,13 +571,9 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
     );
   }
 
-
-
-
 @override
   Widget build(BuildContext context) {
     const TextStyle mono = TextStyle(fontFamily: 'monospace');
-
 
     return WillPopScope(
       onWillPop: () async {

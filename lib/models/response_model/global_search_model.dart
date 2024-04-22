@@ -12,6 +12,7 @@ class GlobalSearch {
         customerResult!.add(CustomerResult.fromJson(v));
       });
     }
+
     if (json['leadResult'] != null) {
       leadResult = <LeadResult>[];
       json['leadResult'].forEach((v) {

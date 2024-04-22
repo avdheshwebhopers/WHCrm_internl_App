@@ -1,3 +1,4 @@
+
 class AppExceptions implements Exception {
 
   final _message ;
@@ -62,7 +63,3 @@ class ServerErrorException extends AppExceptions {
 class UnProcessableException extends AppExceptions {
   UnProcessableException([String? message]) : super(message, "UnProcessable Exception: ");
 }
-
-
-
-

@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../../utils/textfields.dart';
@@ -44,6 +43,7 @@ class InputEmailWidget extends StatelessWidget {
    //   return regex.hasMatch(email);
    // }
 }
+
 
 
 

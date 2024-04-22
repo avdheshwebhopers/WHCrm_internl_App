@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class TextInputField extends StatelessWidget {
+
   TextInputField({
     this.titleController,
     this.titleFocusNode,
@@ -56,4 +57,3 @@ class TextInputField extends StatelessWidget {
     );
   }
 }
-

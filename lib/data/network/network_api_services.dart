@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -250,31 +249,3 @@ Future<void> _logoutAndNavigateToSignIn() async {
   // Navigate to the login view and clear the entire navigation stack
   Get.offAllNamed(RouteName.loginView);
 }
-//
-// void _showTimeoutDialog() {
-//   showDialog(
-//     context: ,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: Text("Request Timeout"),
-//         content: Text("The request took too long to complete."),
-//         actions: [
-//           ElevatedButton(
-//             onPressed: () {
-//               Navigator.of(context).pop();
-//             },
-//             child: Text("OK"),
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-//
-
-
-
-
-
-
-

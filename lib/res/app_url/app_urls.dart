@@ -1,5 +1,4 @@
 
-
 class AppUrls{
 
   static var baseURL = "https://webhopers.whsuites.com/api/";
@@ -13,4 +12,3 @@ class AppUrls{
   static var callType = "${baseURL}dashboard/call-types";
 
 }
-

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../colors/app_color.dart';
 
-
 class InterNetExceptionWidget extends StatefulWidget {
   final VoidCallback onPress ;
   const InterNetExceptionWidget({Key? key , required this.onPress}) : super(key: key);

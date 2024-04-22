@@ -1,14 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-
 import '../../res/colors/app_color.dart';
 import '../../view_models/controller/global_search/global_search_viewmodel.dart';
 import 'CustomerDetailsTab.dart';
 import 'LeadDetailsTab.dart';
-
 
 class GlobalSearchScreen extends StatefulWidget {
   @override

@@ -40,6 +40,10 @@ class LoginRepository {
     UserViewModel userViewModel = UserViewModel();
     String id = (await userViewModel.getUser()).user?.id ?? '';
     dynamic response = await _apiService.getApiResponse( "${AppUrls.profileApi}/$id" );
+
     print("profile response: $response");
+
     return response;
-  } }
+  }
+
+}

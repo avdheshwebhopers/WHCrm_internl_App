@@ -1,4 +1,3 @@
-
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +17,11 @@ class Utils {
       padding: EdgeInsets.all(2.h),
       dismissDirection: FlushbarDismissDirection.HORIZONTAL,
     ).show(context);
+
   }
 
   static void errorAlertDialogue(String? message, BuildContext context) {
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -57,6 +58,7 @@ class Utils {
   }
 
   static void confirmationDialogue(String? message , String? title ,onPress, BuildContext context){
+
     showDialog(context: context, builder: (BuildContext context){
       return CupertinoAlertDialog(
         title: TextWithStyle.containerTitle(context, title!),
@@ -76,4 +78,3 @@ class Utils {
     });
   }
 }
-
