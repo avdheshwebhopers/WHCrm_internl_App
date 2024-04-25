@@ -352,7 +352,7 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
       List<File> mp3Files = files
           .where((file) => file.path.toLowerCase().endsWith('.mp3') || file.path.toLowerCase().endsWith('.aac') || file.path.toLowerCase().endsWith('.wav')
           || file.path.toLowerCase().endsWith('.wma') || file.path.toLowerCase().endsWith('.dolby') || file.path.toLowerCase().endsWith('.digital') || file.path.toLowerCase().endsWith('.dts')
-          || file.path.toLowerCase().endsWith('.m4a'))          .map((file) => File(file.path))
+          || file.path.toLowerCase().endsWith('.m4a')).map((file) => File(file.path))
           .toList();
 
       if (mp3Files.isNotEmpty) {
@@ -503,20 +503,22 @@ class _CallViewState extends State<CallView> with WidgetsBindingObserver {
   }
 
   void _callNumber(String phoneNumber) async {
-    try {
-      final String directoryPath = await _getDirectoryPathFromLocalStorage();
-      print("directory path: $directoryPath");
 
-      if (directoryPath.isNotEmpty) {
-        // Directory path is not empty, proceed with making the call
-        await FlutterPhoneDirectCaller.callNumber("+91" + phoneNumber);
-      }
-        // Directory path is empty, show dialog to select directory
-    } catch (e) {
-      await _showDirectorySelectionDialog();
-
-      print('Error making call: $e');
-    }
+    await FlutterPhoneDirectCaller.callNumber("+91" + phoneNumber);
+    // try {
+    //   final String directoryPath = await _getDirectoryPathFromLocalStorage();
+    //   print("directory path: $directoryPath");
+    //
+    //   if (directoryPath.isNotEmpty) {
+    //     // Directory path is not empty, proceed with making the call
+    //
+    //   }
+    //     // Directory path is empty, show dialog to select directory
+    // } catch (e) {
+    //   await _showDirectorySelectionDialog();
+    //
+    //   print('Error making call: $e');
+    // }
   }
 
   Future<void> _showDirectorySelectionDialog() async {
