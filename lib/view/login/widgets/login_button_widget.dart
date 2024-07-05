@@ -13,11 +13,11 @@ class LoginButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<LoginViewModel>(
       builder: (loginVM) {
-        return Obx(
-              () => Button(
+        return Obx(() => Button(
             title: 'Login',
             isLoading: loginVM.loading.value,
             onPress: () {
+              FocusScope.of(context).unfocus();
               if (formKey.currentState != null && formKey.currentState!.validate()) {
                 loginVM.loginApi(context);
                 }

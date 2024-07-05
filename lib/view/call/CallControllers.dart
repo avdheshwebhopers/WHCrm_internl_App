@@ -54,7 +54,7 @@ class CallControllers extends GetxController {
     final deviceToken = await _getDeviceToken();
     print("deviceToken: $deviceToken");
 
-    print(socket);
+    print('Socket connected: ${socket.active}');
 
     socket.on('make-call-$deviceToken', (data) {
       print('Received message from server: $data');

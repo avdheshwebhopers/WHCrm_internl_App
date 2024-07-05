@@ -3,9 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:whsuites_calling/res/colors/app_color.dart';
 import 'package:whsuites_calling/res/routes/routes.dart';
 import 'package:whsuites_calling/view/call/call_view.dart';
@@ -58,18 +56,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FlutterNativeSplash.remove();
-
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
 
-    return ResponsiveSizer(
-        builder: (context, orientation, screenType) {
-      return GetMaterialApp(
+    return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          //themeMode: Provider.of<ThemeChange>(context).thememode,
           theme: ThemeData(
               fontFamily: "SFPro-Rounded",
               brightness: Brightness.light,
@@ -83,10 +76,6 @@ class MyApp extends StatelessWidget {
           ),
         getPages: AppRoutes.appRoutes(),
       );
-
-            },
-            maxMobileWidth: 400,
-          );
   }
 }
 

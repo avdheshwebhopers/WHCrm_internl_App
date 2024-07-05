@@ -10,12 +10,10 @@ class SplashServices {
   void isLogin(){
 
     userPreference.getUser().then((value){
-
       print(value.accessToken);
-
       if(value.accessToken == "null" || value.accessToken.toString() == ''){
-        Timer(const Duration(seconds: 3) ,
-                () => Get.toNamed(RouteName.loginView) );
+        Timer(const Duration(seconds: 3),
+                () => Get.toNamed(RouteName.loginView));
       }else {
         Timer(
           const Duration(seconds: 3),

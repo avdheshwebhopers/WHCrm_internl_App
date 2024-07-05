@@ -15,6 +15,5 @@ class CallBinding extends Bindings {
     Get.lazyPut<CallControllers>(
           () => CallControllers(),
     );
-
   }
 }

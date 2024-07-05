@@ -13,25 +13,7 @@ import 'base_api_services.dart';
 class NetworkApiServices extends BaseApiServices {
 
   @override
-  Future deleteApiResponse(String url) async {
-    if (kDebugMode) {
-      print(url);
-    }
-    dynamic responseJson ;
-    try {
-      final response = await http.delete(Uri.parse(url)).timeout( const Duration(seconds: 10));
-      responseJson  = _returnResponse(response) ;
-    }on SocketException {
-      throw InternetException('');
-    }on RequestTimeOut {
-      throw RequestTimeOut('Request Time out');
-
-    }
-    return responseJson ;
-  }
-
-  @override
-  Future getApiResponse(String url) async {
+  Future getApi(String url) async {
     if (kDebugMode) {
       print(url);
     }
@@ -61,7 +43,7 @@ class NetworkApiServices extends BaseApiServices {
   }
 
   @override
-  Future postApiResponse(String url, dynamic data) async {
+  Future postApi(String url, dynamic data) async {
     if (kDebugMode) {
       print(url);
       print(data);
@@ -128,56 +110,6 @@ class NetworkApiServices extends BaseApiServices {
     }
   }
 
-// Helper function to handle errors
-  void _handleError(dynamic e) {
-    if (e is SocketException) {
-      throw InternetException('');
-    } else if (e is TimeoutException) {
-      throw RequestTimeOut('Request Time out');
-    }
-  }
-
-  Future<String> postApiResponseToken() async {
-    final sp = await SharedPreferences.getInstance();
-    return sp.getString('accessToken') ?? '';
-  }
-
-  @override
-  Future postEmptyParmApiResponse(String url, bodyParms) async {
-    if (kDebugMode) {
-      print(url);
-    }
-    dynamic responseJson ;
-    try {
-      final response = await http.post(Uri.parse(url)).timeout( const Duration(seconds: 10));
-      responseJson  = _returnResponse(response) ;
-    }on SocketException {
-      throw InternetException('');
-    }on RequestTimeOut {
-      throw RequestTimeOut('Request Time out');
-    }
-    print(responseJson.toString());
-    return responseJson ;
-  }
-
-  @override
-  Future putApiResponse(String url, bodyParms)async {
-    if (kDebugMode) {
-      print(url);
-    }
-    dynamic responseJson ;
-    try {
-      final response = await http.put(Uri.parse(url)).timeout( const Duration(seconds: 10));
-      responseJson  = _returnResponse(response) ;
-    }on SocketException {
-      throw InternetException('');
-    }on RequestTimeOut {
-      throw RequestTimeOut('Request Time out');
-    }
-    print(responseJson.toString());
-    return responseJson ;
-  }
-
   dynamic _returnResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:
@@ -222,30 +154,35 @@ class NetworkApiServices extends BaseApiServices {
             'Error occured while Communication with Server with StatusCode : ${response.statusCode}');
     }
   }
+
 }
 
 // Handle the unauthorized scenario
 void _handleUnauthorized() async {
-
   // Show an alert dialog indicating session expired
   await Get.defaultDialog(
     barrierDismissible: false,
     title: "Session Expired",
     middleText: "Your session has expired. Please log in again.",
     onConfirm: () async {
-      // Clear any user-related data
       await _logoutAndNavigateToSignIn();
     },
   );
 }
 
+void _handleError(dynamic e) {
+  if (e is SocketException) {
+    throw InternetException('');
+  } else if (e is TimeoutException) {
+    throw RequestTimeOut('Request Time out');
+  }
+}
+
 // Logout the user and navigate to the sign-in screen
 Future<void> _logoutAndNavigateToSignIn() async {
   UserViewModel userViewModel = UserViewModel();
-
   // Clear any user-related data
   userViewModel.remove();
-
   // Navigate to the login view and clear the entire navigation stack
   Get.offAllNamed(RouteName.loginView);
 }

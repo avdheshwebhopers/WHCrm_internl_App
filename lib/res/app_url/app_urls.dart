@@ -2,7 +2,6 @@
 class AppUrls{
 
   static var baseURL = "https://webhopers.whsuites.com/api/";
-
   static var loginApi = "${baseURL}auth/signin";
   static var logoutApi = "${baseURL}auth/logout";
   static var leadDetailApi = "${baseURL}lead-activities/by-phone";

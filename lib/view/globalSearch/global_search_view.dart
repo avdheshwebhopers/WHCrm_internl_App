@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../res/colors/app_color.dart';
 import '../../view_models/controller/global_search/global_search_viewmodel.dart';
 import 'CustomerDetailsTab.dart';
@@ -12,8 +11,7 @@ class GlobalSearchScreen extends StatefulWidget {
   _GlobalSearchScreenState createState() => _GlobalSearchScreenState();
 }
 
-class _GlobalSearchScreenState extends State<GlobalSearchScreen>
-    with SingleTickerProviderStateMixin {
+class _GlobalSearchScreenState extends State<GlobalSearchScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _showTabs = false;
   GlobalSearchViewModel viewModel = GlobalSearchViewModel();
@@ -28,8 +26,7 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     viewModel = Get.put(GlobalSearchViewModel());
-    _directoryPath = Get.arguments as String; // Retrieve directory path from route arguments
-
+    _directoryPath = Get.arguments; // Retrieve directory path from route arguments
   }
 
   @override
@@ -42,7 +39,6 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
   void _onSearchTextChanged(String value) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      // Debounce the search function
       setState(() {
         _searchClicked = false;
       });
@@ -53,8 +49,7 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
     setState(() {
       _searchClicked = true;
       _showTabs = true;
-      viewModel.search(
-          _searchController.text); // Perform search when search icon is clicked
+      viewModel.search(_searchController.text); // Perform search when search icon is clicked
     });
   }
 
@@ -62,102 +57,68 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 10.h,
         centerTitle: false,
         elevation: 0,
         title: Text(
           'Global Search',
           style: TextStyle(
             color: Colors.black,
-            fontSize: 20.sp,
+            fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 0.h, horizontal: 5.w),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.w),
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: _onSearchButtonClicked,
-                        icon: Icon(
-                          Icons.search,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ),
-                    onChanged: _onSearchTextChanged,
+      body: Container(
+        margin: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                suffixIcon: IconButton(
+                  onPressed: _onSearchButtonClicked,
+                  icon: Icon(
+                    Icons.search,
+                    color: AppColors.primaryColor,
                   ),
                 ),
-              ],
+              ),
+              onChanged: _onSearchTextChanged,
             ),
-          ),
-          if (_showTabs && _searchClicked)
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(2.h),
+            if (_showTabs && _searchClicked)
+              Expanded(
                 child: Column(
                   children: [
                     Container(
-                      height: 7.h,
+                      margin: EdgeInsets.only(bottom: 10,top: 10),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0.h),
+                        borderRadius: BorderRadius.circular(10),
                         color: Colors.transparent,
                       ),
                       child: TabBar(
-                        splashFactory: NoSplash.splashFactory,
                         labelColor: AppColors.primaryColor,
                         unselectedLabelColor: Colors.black54,
-                        labelStyle: TextStyle(fontSize: 16.sp),
+                        labelStyle: TextStyle(fontSize: 16),
                         dividerColor: Colors.transparent,
                         tabs: <Widget>[
                           Tab(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
+                            child: Obx(() =>
                                 Text(
-                                  'Customer details',
-                                  style: TextStyle(fontSize: 16.sp),
-                                ),
-                                SizedBox(width: 5),
-                                // Add spacing between text and count
-                                Obx(() =>
-                                    Text(
-                                      '(${viewModel.customerResult.length})',
-                                      // Display count dynamically
-                                      style: TextStyle(fontSize: 16.sp),
-                                    )),
-                              ],
-                            ),
+                                  'Customer details \n(${viewModel.customerResult.length})',
+                                  style: TextStyle(fontSize: 16),
+                                )),
                           ),
                           Tab(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
+                            child: Obx(() =>
                                 Text(
-                                  'Lead Details',
-                                  style: TextStyle(fontSize: 16.sp),
-                                ),
-                                SizedBox(width: 5),
-                                // Add spacing between text and count
-                                Obx(() =>
-                                    Text(
-                                      '(${viewModel.leadResult.length})',
-                                      // Display count dynamically
-                                      style: TextStyle(fontSize: 16.sp),
-                                    )),
-                              ],
-                            ),
+                                  'Lead Details\n(${viewModel.leadResult.length})',
+                                  // Display count dynamically
+                                  style: TextStyle(fontSize: 16),
+                                )),
                           ),
                         ],
                         controller: _tabController,
@@ -165,18 +126,16 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
                     ),
                     Expanded(
                       child: TabBarView(
-                        physics: ScrollPhysics(),
+                        physics: const ScrollPhysics(),
                         controller: _tabController,
                         children: <Widget>[
-                          Obx(() =>
-                          viewModel.isLoading.value ? const Center(
-                              child: CircularProgressIndicator())
+                          Obx(() => viewModel.isLoading.value
+                              ? const Center(child: CircularProgressIndicator())
                               : CustomerDetailsTab(
                               directoryPath: _directoryPath,
                               data: viewModel.getCustomerData())),
-                          Obx(() =>
-                          viewModel.isLoading.value ? const Center(
-                              child: CircularProgressIndicator())
+                          Obx(() => viewModel.isLoading.value
+                              ? const Center(child: CircularProgressIndicator())
                               : LeadDetailsTab(
                               directoryPath: _directoryPath,
                               data: viewModel.getLeadData())),
@@ -186,8 +145,8 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen>
                   ],
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

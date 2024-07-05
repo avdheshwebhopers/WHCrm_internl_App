@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 
 class TextInputField extends StatelessWidget {
 
@@ -25,10 +24,9 @@ class TextInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 1.2,
-      borderRadius: BorderRadius.circular(20.h),
+      borderRadius: BorderRadius.circular(20),
       child: TextField(
-        style: TextStyle(fontSize: 16.sp),
+        style: TextStyle(fontSize: 16),
         controller: titleController,
         focusNode: titleFocusNode,
         maxLines: null,
@@ -38,18 +36,18 @@ class TextInputField extends StatelessWidget {
           filled: true,
           fillColor: Colors.white,
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(20.h),
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20.h)),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none
           ),
-          contentPadding: EdgeInsets.fromLTRB(1.w, 2.5.h, 1.w, 2.5.h),
+          contentPadding: const EdgeInsets.all(20),
           border: InputBorder.none,
           prefixIcon: Padding(
-            padding: EdgeInsets.fromLTRB(4.w, 2.h, 2.w, 2.h),
-            child: Icon(prefixIcon, size: 3.h),
+            padding: EdgeInsets.all(5),
+            child: Icon(prefixIcon, size: 25),
           ),
           hintText: hintText,
         ),

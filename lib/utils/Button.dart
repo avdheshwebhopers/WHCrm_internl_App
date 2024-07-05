@@ -1,8 +1,6 @@
 // ignore: file_names
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import '../res/colors/app_color.dart';
 
 class Button extends StatelessWidget {
@@ -27,20 +25,19 @@ class Button extends StatelessWidget {
           MediaQuery.of(context).size.width / 1.3,
           MediaQuery.of(context).size.height / 15,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(20.h)),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
       ),
       child: isLoading
-          ? CircularProgressIndicator( // Loading indicator
+          ? const CircularProgressIndicator( // Loading indicator
         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
       )
           : Text(
         title,
-        style: GoogleFonts.poppins(
+        style: const TextStyle(
           color: Colors.white,
-          textStyle: Theme.of(context).textTheme.bodyMedium,
-          fontSize: 18.sp,
+          fontSize: 18,
           fontWeight: FontWeight.w400,
         ),
       ),

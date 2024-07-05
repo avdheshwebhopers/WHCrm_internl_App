@@ -22,7 +22,7 @@ class GlobalSearch {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (customerResult != null) {
       data['customerResult'] = customerResult!.map((v) => v.toJson()).toList();
     }
@@ -51,7 +51,7 @@ class CustomerResult {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['first_name'] = firstName;
     data['last_name'] = lastName;
@@ -79,7 +79,7 @@ class LeadResult {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['first_name'] = firstName;
     data['last_name'] = lastName;

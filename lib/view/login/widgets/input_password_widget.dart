@@ -13,23 +13,35 @@ class InputPasswordWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return  PasswordInputField(
+    return Obx(() => TextFormField(
       controller: loginVM.passwordController.value,
       focusNode: loginVM.passwordFocusNode.value,
-      prefixIcon: CupertinoIcons.lock_circle,
-
-      suffixIcon: Icons.visibility,
-      hintText: 'Enter password',
-      obscureText: true,
-      validator: (value){
-        if(value!.isEmpty){
-          Utils.textError(context, "Please Enter Password");
+      decoration: InputDecoration(
+          labelText: 'Password',
+          hintText: 'Enter your password',
+          prefixIcon: const Icon(CupertinoIcons.padlock_solid),
+          suffixIcon: IconButton(
+            icon: Icon(
+              loginVM.obscureText.value ? Icons.visibility : Icons.visibility_off,
+            ),
+            onPressed: () {
+              loginVM.toggleObscureText();
+            },
+          ),
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))
+          )
+      ),
+      obscureText: loginVM.obscureText.value,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter password';
         }
+        return null;
       },
-      onFieldSubmitted: (value){
+      onChanged: (value) {
+        loginVM.password.value = value;
       },
-    );
+    ));
   }
-
 }

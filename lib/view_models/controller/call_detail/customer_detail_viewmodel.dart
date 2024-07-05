@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/network/network_api_services.dart';
 import '../../../res/app_url/app_urls.dart';
 import '../../../utils/utils.dart';
 import 'package:http/http.dart' as http;
 
 class CustomerDetailsViewModel extends GetxController {
-
   final _apiService = NetworkApiServices();
 
   // Observable variables for call details
@@ -23,8 +23,12 @@ class CustomerDetailsViewModel extends GetxController {
   var reminder = ''.obs;
   final loading = false.obs;
 
-  Future<void> customerDetailApi(BuildContext context,
-      Uint8List latestMp3FilePath , String directoryPath) async {
+  Future<String> _getDeviceToken() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString('accessToken') ?? '';
+  }
+
+  Future<void> customerDetailApi(BuildContext context, Uint8List? latestMp3FilePath, String? directoryPath) async {
     loading.value = true;
 
     // Define the list of fields to check for emptiness
@@ -48,29 +52,11 @@ class CustomerDetailsViewModel extends GetxController {
       }
     }
 
-    if (id.value.isEmpty) {
-      Utils.errorAlertDialogue("Waiting for the call", context);
-      return;
-    }
-
-    if (latestMp3FilePath.isEmpty) {
-      loading.value = false;
-      Utils.errorAlertDialogue("Latest MP3 file data is empty", context);
-      return;
-    }
-
-    // ... check for other fields and handle validation
-
-    var url = AppUrls
-        .customerDetailApi;
-    // Assuming AppUrls.callDetailApi is your API endpoint
+    var url = AppUrls.customerDetailApi;
     var request = http.MultipartRequest('POST', Uri.parse(url));
-
-    // Attach the MP3 file as a part
 
     // Check if duration is 0, if so, don't send the MP3 file
     if (duration.value == '0') {
-      // Proceed with sending other data or return if appropriate
       request.fields.addAll({
         'id': id.value,
         'type': type.value,
@@ -83,31 +69,28 @@ class CustomerDetailsViewModel extends GetxController {
         'create_from': createFrom.value,
         'reminder': reminder.value
       });
-      // return;
     } else {
-      // ... your existing code to send the MP3 file
-      // var url = AppUrls.leadDetailApi;
-      // var request = http.MultipartRequest('POST', Uri.parse(url));
-      String originalExtension = directoryPath.split('.').last;
+      if (latestMp3FilePath != null && directoryPath != null) {
+        String originalExtension = directoryPath.split('.').last;
+        String filename = '${toNumber.value}.$originalExtension'; // Construct the filename with the original extension
 
-      String filename = '${toNumber.value}.$originalExtension'; // Construct the filename with the original extension
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'call_record',
+            latestMp3FilePath,
+            filename: filename,
+          ),
+        );
 
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'call_record',
-          latestMp3FilePath,
-          filename: filename,
-        ),
-      );
+        // Print the filename
+        print('Filename being sent: $filename');
+        print('path is here: $directoryPath');
+        // Log or print the request object to inspect it
+        print('Request object after adding file: $request');
+        // Log the size of the file being sent
+        print('File size: ${latestMp3FilePath.length} bytes');
+      }
 
-      // Print the filename
-      print('Filename being sent: $filename');
-      print('pathis here ${directoryPath}');
-      // Log or print the request object to inspect it
-      print('Request object after adding file: $request');
-      // Log the size of the file being sent
-      print('File size: ${latestMp3FilePath.length} bytes');
-      // Add other fields to the request
       // Add other fields to the request
       request.fields.addAll({
         'id': id.value,
@@ -119,17 +102,17 @@ class CustomerDetailsViewModel extends GetxController {
         'call_type': calltype.value,
         'remark': remark.value,
         'create_from': createFrom.value,
-        'reminder': reminder.value,
+        'reminder': reminder.value
       });
     }
 
+    final token = await _getDeviceToken();
     try {
       if (kDebugMode) {
         print('Sending request...');
       }
 
-      String token = await _apiService.postApiResponseToken();
-      var response = await _apiService.postApiResponserequest(url, request , token);
+      var response = await _apiService.postApiResponserequest(url, request, "token");
 
       // Check the response status
       if (response != null) {
@@ -141,16 +124,13 @@ class CustomerDetailsViewModel extends GetxController {
           Utils.errorAlertDialogue("Data Missing $response", context);
         }
       } else {
-        // Handle error response
         Utils.errorAlertDialogue("Failed to send data.", context);
       }
     } catch (error) {
       loading.value = false;
       print('Error sending request: $error');
       if (kDebugMode) {
-
         print(error.toString());
-
       }
     }
   }

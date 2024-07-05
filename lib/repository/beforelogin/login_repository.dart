@@ -7,42 +7,40 @@ class LoginRepository {
   final _apiService = NetworkApiServices();
 
   Future<dynamic> loginApi(var data) async {
-    dynamic response = await _apiService.postApiResponse( AppUrls.loginApi , data);
+    dynamic response = await _apiService.postApi( AppUrls.loginApi , data);
     return response;
   }
 
   Future<dynamic> leadDetailApi(var data) async {
-    dynamic response = await _apiService.postApiResponse( AppUrls.leadDetailApi , data);
+    dynamic response = await _apiService.postApi( AppUrls.leadDetailApi , data);
     return response;
   }
 
   Future<dynamic> customerDetailApi (var data) async {
-    dynamic response = await _apiService.postApiResponse( AppUrls.customerDetailApi , data);
+    dynamic response = await _apiService.postApi( AppUrls.customerDetailApi , data);
     return response;
   }
 
   Future<dynamic> globalSearchApi (var data) async {
-    dynamic response = await _apiService.postApiResponse( AppUrls.globalSearchApi , data);
+    dynamic response = await _apiService.postApi( AppUrls.globalSearchApi , data);
     return response;
   }
 
   Future<dynamic> logOutApi (var data) async {
-    dynamic response = await _apiService.postApiResponse( AppUrls.logoutApi , data);
+    dynamic response = await _apiService.postApi( AppUrls.logoutApi , data);
     return response;
   }
 
   Future<dynamic> callTypeApi () async {
-    dynamic response = await _apiService.getApiResponse( AppUrls.callType);
+    dynamic response = await _apiService.getApi( AppUrls.callType);
     return response;
   }
 
-   Future<String> profileApi() async {
+  Future<String> profileApi() async {
     UserViewModel userViewModel = UserViewModel();
     String id = (await userViewModel.getUser()).user?.id ?? '';
-    dynamic response = await _apiService.getApiResponse( "${AppUrls.profileApi}/$id" );
-
+    dynamic response = await _apiService.getApi( "${AppUrls.profileApi}/$id" );
     print("profile response: $response");
-
     return response;
   }
 

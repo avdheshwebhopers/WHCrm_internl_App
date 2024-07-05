@@ -12,6 +12,8 @@ class LoginViewModel extends GetxController {
   final _api = LoginRepository();
   final userViewModel = UserViewModel();
 
+  var email = ''.obs;
+  var password = ''.obs;
   final emailController = TextEditingController().obs;
   final passwordController = TextEditingController().obs;
 
@@ -19,9 +21,14 @@ class LoginViewModel extends GetxController {
   final passwordFocusNode = FocusNode().obs;
 
   final loading = false.obs;
+  var obscureText = true.obs;
+
+  void toggleObscureText() {
+    obscureText.value = !obscureText.value;
+  }
 
   Future<void> loginApi(BuildContext context) async {
-    if (emailController.value.text.isEmpty || passwordController.value.text.isEmpty) {
+    if (email.value.isEmpty || password.value.isEmpty) {
       Utils.errorAlertDialogue("Please enter email and password", context);
       return;
     }
@@ -30,21 +37,22 @@ class LoginViewModel extends GetxController {
 
     final deviceToken = await _getDeviceToken();
 
-    Map data = {
-      'email': emailController.value.text,
-      'password': passwordController.value.text,
+    Map<String, String> data = {
+      'email': email.value,
+      'password': password.value,
       'device_id': deviceToken,
     };
 
     try {
       final value = await _api.loginApi(data);
       if (value is Map<String, dynamic> && value.containsKey('accessToken')) {
+        loading.value = false;
         await _handleSuccessfulLogin(context, value);
       } else {
+        loading.value = false;
         Utils.errorAlertDialogue("Invalid Credentials", context);
       }
-    }
-    catch (error) {
+    } catch (error) {
       loading.value = false;
       if (kDebugMode) {
         print(error.toString());
@@ -57,9 +65,7 @@ class LoginViewModel extends GetxController {
     return await messaging.getToken() ?? "abed12345";
   }
 
-  Future<void> _handleSuccessfulLogin(
-      BuildContext context, Map<String, dynamic> value) async {
-    // Check if 'accessToken' and 'user' are present in the response
+  Future<void> _handleSuccessfulLogin(BuildContext context, Map<String, dynamic> value) async {
     if (value.containsKey('accessToken') && value.containsKey('user')) {
       final loginResponseModel = LoginResponseModel(
         accessToken: value['accessToken'].toString(),
@@ -72,22 +78,20 @@ class LoginViewModel extends GetxController {
       );
 
       // Debug prints
-      print('User Information Before Save: ${loginResponseModel.user!.firstName}');
+      print('User Information Before Save: ${loginResponseModel.user?.firstName}');
 
       // Save the user information
       await userViewModel.saveUser(loginResponseModel);
 
       // Debug prints
-
       Get.delete<LoginViewModel>();
 
       Get.toNamed(
         RouteName.callview,
       );
 
-      Utils.successDialogue("Logged In Successfully", context);
-    }
-    else {
+      Utils.successText(context, "Logged In Successfully");
+    } else {
       Utils.errorAlertDialogue("Invalid Credentials", context);
     }
   }

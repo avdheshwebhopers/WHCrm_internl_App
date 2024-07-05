@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:whsuites_calling/res/colors/app_color.dart';
 import '../view_models/services/splash_services.dart';
 
@@ -25,12 +23,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundcolor,
+      backgroundColor: Colors.white,
       body: Center(
         child: Image.asset(
-          'assets/gif/incoming_call.gif', // Update with the correct path to your GIF in the assets folder
-          width: 20.w, // Adjust the width as needed
-          height: 20.h, // Adjust the height as needed
+          'assets/image/logo.png', // Update with the correct path to your GIF in the assets folder
+          width: MediaQuery.of(context).size.width/2, // Adjust the width as needed
+          height: MediaQuery.of(context).size.width/2, // Adjust the height as needed
           fit: BoxFit.contain, // Adjust the BoxFit property as needed
         ),
       ),

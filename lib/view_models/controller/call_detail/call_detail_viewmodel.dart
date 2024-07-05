@@ -87,8 +87,8 @@ class CallDetailsViewModel extends GetxController {
 
     try {
       print('Sending request...');
-      String token = await _apiService.postApiResponseToken();
-      var response = await _apiService.postApiResponserequest(url, request , token);
+      // String token = await _apiService.postApiResponseToken();
+      var response = await _apiService.postApiResponserequest(url, request , 'token');
 
       // Check the response status
       if (response != null) {
